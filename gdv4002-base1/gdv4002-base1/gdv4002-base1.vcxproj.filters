@@ -62,5 +62,8 @@
     <ClInclude Include="GameObject2D.h">
       <Filter>Engine</Filter>
     </ClInclude>
+    <ClInclude Include="keys.h">
+      <Filter>Engine</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

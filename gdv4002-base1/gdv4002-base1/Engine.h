@@ -1,5 +1,7 @@
 #pragma once
 
+// Engine.h ver 1.1
+
 #include "GraphicsCore.h"
 
 #include "GUMemory.h"
@@ -11,7 +13,9 @@
 #include <math.h>
 #include <iostream>
 #include <string>
+#include <map>
 #include <unordered_map>
+#include <bitset>
 #include <glm/glm.hpp>
 #include "texture_loader.h"
 
