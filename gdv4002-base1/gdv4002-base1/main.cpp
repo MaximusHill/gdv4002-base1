@@ -9,11 +9,8 @@
 void myUpdate(GLFWwindow* window, double tDelta);
 void myKeyboardHandler(GLFWwindow* window, int key, int scancode, int action, int mods);
 
-
-
-
 int main(void) {
-	
+
 	float playerVelocity = 2.0f;
 	float anglesPerSecond = glm::radians(45.0f);
 	// Initialise the engine (create window, setup OpenGL backend)
@@ -29,11 +26,11 @@ int main(void) {
 	//
 	// Setup game scene objects here
 	//
-	
-	
+
+
 	GLuint playerTexture = loadTexture("Resources\\Textures\\player1_ship.png");
 
-	Player* mainPlayer = new Player(glm::vec2(-1.5f, 0.0f), 0.0f, glm::vec2(0.5f, 0.5f), playerTexture, 1.0f);
+	Player* mainPlayer = new Player(glm::vec2(-1.0f, 0.0f), 0.0f, glm::vec2(0.5f, 0.5f), playerTexture, 1.0f);
 
 	addObject("player", mainPlayer);
 
@@ -52,9 +49,12 @@ int main(void) {
 	addObject("enemy2", enemy2);
 	addObject("enemy3", enemy3);
 
+	// Option A: don't override update -> comment out the next line to use engine's default updater
+	// setUpdateFunction(myUpdate);
+
+	// Option B: if you want a custom update, keep this but implement myUpdate to forward updates
 	setUpdateFunction(myUpdate);
-	
-	
+
 	setViewplaneWidth(10.0f);
 	setKeyboardHandler(myKeyboardHandler);
 
@@ -69,16 +69,16 @@ int main(void) {
 	return 0;
 }
 
-
-
-
 void myUpdate(GLFWwindow* window, double tDelta) {
 
-	static float playerSpeed = 1.0f; // distance per second
-	float playerRotationSpeed = glm::radians(90.0f);
+	// Forward updates for objects you care about since setting setUpdateFunction replaces engine's default updater
 	GameObject2D* player = getObject("player");
-	
+	if (player) player->update(tDelta);
+
+	GameObject2D* enemy1 = getObject("enemy1");
+	if (enemy1) enemy1->update(tDelta);
+	GameObject2D* enemy2 = getObject("enemy2");
+	if (enemy2) enemy2->update(tDelta);
+	GameObject2D* enemy3 = getObject("enemy3");
+	if (enemy3) enemy3->update(tDelta);
 }
-
-
-

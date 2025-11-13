@@ -1,4 +1,3 @@
-
 #include "Keys.h"
 #include <bitset>
 #include "Player.h"
@@ -13,31 +12,27 @@ Player::Player(glm::vec2 initPosition, float initOrientation, glm::vec2 initSize
 }
 void Player::update(double tDelta) {
 
-	// Unlike our myUpdate function, we're already 'in' the player object, so no need to call getObject as we did before :)
+	// Accumulate forces first
 	glm::vec2 F = glm::vec2(0.0f, 0.0f);
-	glm::vec2 a = F * (1.0f / mass);
-	velocity = velocity + (a * (float)tDelta);
-	position = position + (velocity * (float)tDelta);
 	const float thrust = 2.0f;
 
-	// 1. accumulate forces
 	if (keys.test(Key::W) == true) {
-
 		F += glm::vec2(0.0f, thrust);
 	}
 	if (keys.test(Key::S) == true) {
-
 		F += glm::vec2(0.0f, -thrust);
 	}
 	if (keys.test(Key::A) == true) {
-
 		F += glm::vec2(-thrust, 0.0f);
 	}
 	if (keys.test(Key::D) == true) {
-
 		F += glm::vec2(thrust, 0.0f);
 	}
 
+	// Compute acceleration from accumulated force, then integrate velocity and position
+	glm::vec2 a = F * (1.0f / mass);
+	velocity = velocity + (a * (float)tDelta);
+	position = position + (velocity * (float)tDelta);
 }
 void myKeyboardHandler(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
