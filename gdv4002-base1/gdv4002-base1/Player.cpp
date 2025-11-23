@@ -2,34 +2,60 @@
 #include <bitset>
 #include "Player.h"
 #include "GameObject2D.h"
-
+#include "Engine.h"
+extern glm::vec2 gravity;
 std::bitset<5> keys{ 0x0 };
 Player::Player(glm::vec2 initPosition, float initOrientation, glm::vec2 initSize, GLuint initTextureID, float mass) : GameObject2D(initPosition, initOrientation, initSize, initTextureID) {
 
 	this->mass = mass;
 
-	velocity = glm::vec2(0.0f, 0.0f); // default to 0 velocity
+	velocity = glm::vec2(0.0f, 0.0f); 
 }
 void Player::update(double tDelta) {
-
-	// Accumulate forces first
+	
+	
 	glm::vec2 F = glm::vec2(0.0f, 0.0f);
-	const float thrust = 2.0f;
+	const float thrust = 3.0f;
 
+	//Gravity implimented but tued off as i dont like how it feels
+	//F += gravity;
+	
+	//bottom
+	if (position.y <-getViewplaneHeight() / 2.0f) {
+
+		position.y += getViewplaneHeight();
+	}
+	//left
+	if (position.x < -getViewplaneWidth() / 2.0f) {
+
+		position.x += getViewplaneWidth();
+	}
+	//top
+	if (position.y > getViewplaneHeight() / 2.0f) {
+		position.y -= getViewplaneHeight();
+	}
+	//right
+	if (position.x > getViewplaneWidth() / 2.0f) {
+		position.x -= getViewplaneWidth();
+	}
+	
 	if (keys.test(Key::W) == true) {
 		F += glm::vec2(0.0f, thrust);
+		orientation =1.6f;
 	}
 	if (keys.test(Key::S) == true) {
 		F += glm::vec2(0.0f, -thrust);
+		orientation =-1.6f;
 	}
 	if (keys.test(Key::A) == true) {
 		F += glm::vec2(-thrust, 0.0f);
+		orientation += glm::radians(45.0f) * (float)tDelta;
 	}
 	if (keys.test(Key::D) == true) {
 		F += glm::vec2(thrust, 0.0f);
+		orientation -= glm::radians(45.0f) * (float)tDelta;
 	}
 
-	// Compute acceleration from accumulated force, then integrate velocity and position
 	glm::vec2 a = F * (1.0f / mass);
 	velocity = velocity + (a * (float)tDelta);
 	position = position + (velocity * (float)tDelta);
@@ -60,6 +86,9 @@ void myKeyboardHandler(GLFWwindow* window, int key, int scancode, int action, in
 		case GLFW_KEY_D:
 			keys[Key::D] = true;
 			break;
+		case GLFW_KEY_SPACE:
+			keys[Key::SPACE] = true;
+			break;
 
 		}
 
@@ -82,7 +111,9 @@ void myKeyboardHandler(GLFWwindow* window, int key, int scancode, int action, in
 		case GLFW_KEY_D:
 			keys[Key::D] = false;
 			break;
-
+		case GLFW_KEY_SPACE:
+			keys[Key::SPACE] = false;
+			break;
 		}
 
 		// handle key release events

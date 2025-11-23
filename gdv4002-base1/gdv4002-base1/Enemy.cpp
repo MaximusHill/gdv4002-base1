@@ -1,5 +1,6 @@
-
+#include "Engine.h"
 #include "Enemy.h"
+extern glm::vec2 gravity;
 
 Enemy::Enemy(
 	glm::vec2 initPosition,
@@ -14,10 +15,11 @@ Enemy::Enemy(
 	phaseVelocity = initialPhaseVelocity;
 }
 void Enemy::update(double tDelta) {
+	
+	glm::vec2 F = glm::vec2(0.0f, 0.0f);
+	
+	F += gravity;
 
-	// Set position based on phaseAngle
-	position.y = sinf(phaseAngle);
-
-	// Update phaseAngle based on velocity * time elapsed
-	phaseAngle += phaseVelocity * tDelta;
+	position.y = position.y += F.y * (float)tDelta;
+	
 }

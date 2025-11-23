@@ -207,6 +207,8 @@ GLuint loadTexture(const char* texturePath, TextureProperties texProperties) {
 			}
 		}
 	}
+	
+	
 
 	return texture;
 }
