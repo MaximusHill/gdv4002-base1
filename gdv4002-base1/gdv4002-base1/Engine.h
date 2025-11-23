@@ -28,7 +28,7 @@ typedef void (*UpdateFn)(GLFWwindow* window, double tDelta);
 struct GameObjectCollection {
 
 	int					objectCount;
-	GameObject2D**		objectArray;
+	GameObject2D** objectArray;
 
 	// Default constructor - setup empty collection (0, nullptr)
 	GameObjectCollection() {

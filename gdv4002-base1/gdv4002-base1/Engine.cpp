@@ -73,7 +73,7 @@ int engineInit(const char* windowTitle, int initWidth, int initHeight, float ini
 	glfwMakeContextCurrent(window);
 
 	windowTitleString = std::string(windowTitle);
-	
+
 	windowWidth = initWidth;
 	windowHeight = initHeight;
 	viewplaneAspect = (float)windowHeight / (float)windowWidth;
@@ -223,7 +223,7 @@ GameObject2D* addObject(const char* name, glm::vec2 initPosition, float initOrie
 	GameObject2D* newObject = new GameObject2D(initPosition, initOrientation, initSize, texture);
 
 	return addObject(name, newObject);
-	
+
 }
 
 GameObject2D* addObject(const char* name, GameObject2D* newObject) {
