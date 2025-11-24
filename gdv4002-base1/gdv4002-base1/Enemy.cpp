@@ -11,8 +11,7 @@ Enemy::Enemy(
 	float initialPhaseVelocity)
 	: GameObject2D(initPosition, initOrientation, initSize, initTextureID) {
 
-	phaseAngle = initialPhase;
-	phaseVelocity = initialPhaseVelocity;
+	
 }
 void Enemy::update(double tDelta) {
 	
@@ -21,5 +20,6 @@ void Enemy::update(double tDelta) {
 	F += gravity;
 
 	position.y = position.y += F.y * (float)tDelta;
+	
 	
 }

@@ -3,6 +3,7 @@
 #include "Player.h"
 #include "GameObject2D.h"
 #include "Engine.h"
+
 extern glm::vec2 gravity;
 std::bitset<5> keys{ 0x0 };
 Player::Player(glm::vec2 initPosition, float initOrientation, glm::vec2 initSize, GLuint initTextureID, float mass) : GameObject2D(initPosition, initOrientation, initSize, initTextureID) {
@@ -55,7 +56,9 @@ void Player::update(double tDelta) {
 		F += glm::vec2(thrust, 0.0f);
 		orientation -= glm::radians(45.0f) * (float)tDelta;
 	}
-
+	if (keys.test(Key::SPACE) == true) {
+		
+	}
 	glm::vec2 a = F * (1.0f / mass);
 	velocity = velocity + (a * (float)tDelta);
 	position = position + (velocity * (float)tDelta);

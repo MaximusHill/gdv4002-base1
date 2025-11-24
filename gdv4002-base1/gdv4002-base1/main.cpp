@@ -6,18 +6,20 @@
 #include "Player.h"
 #include "Enemy.h"
 #include <random>
+#include "Background.h"
 // Function prototypes
 void myUpdate(GLFWwindow* window, double tDelta);
 void myKeyboardHandler(GLFWwindow* window, int key, int scancode, int action, int mods);
 glm::vec2 gravity = glm::vec2(0.0f, -0.3f);
-float randompositionX();
-float randompositionY();
-float randomsizeX();
-float randomsizeY();
-float randomrotation();
+float randomPositionX();
+float randomPositionY();
+float randomSizeX();
+float randomSizeY();
+float randomRotation();
+
+
 int main(void) {
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	
 	float playerVelocity = 2.0f;
 	
 	// Initialise the engine (create window, setup OpenGL backend)
@@ -29,14 +31,24 @@ int main(void) {
 		printf("Cannot setup game window!!!\n");
 		return initResult; // exit if setup failed
 	}
+	setViewplaneWidth(10.0f);
 
-	//
-	// Setup game scene objects here
-	//
+	GLuint backgroundTexture = loadTexture("Resources\\Textures\\Background.png");
+
+	printf("Background texture ID = %u\n", backgroundTexture);
+
+	float backGroundHeight = getViewplaneHeight() * 1.0f;
+	float backGroundWidth = getViewplaneWidth()*1.0f;
+
 	
-	GLuint playerTexture = loadTexture("Resources\\Textures\\player1_ship.png");
 
+	GLuint playerTexture = loadTexture("Resources\\Textures\\player1_ship.png");
+	
 	Player* mainPlayer = new Player(glm::vec2(0.0f, 0.0f), 0.0f, glm::vec2(0.5f, 0.5f), playerTexture, 0.5f);
+
+	Background* background = new Background(glm::vec2(0.0f, 0.0f), 0.0f, glm::vec2(backGroundWidth, backGroundHeight), backgroundTexture);
+
+	addObject("background", background);
 
 	addObject("player", mainPlayer);
 
@@ -45,13 +57,16 @@ int main(void) {
 	GLuint enemyTexture = loadTexture("Resources\\Textures\\asteroid.png");
 	
 	// 2. Create enemy objects
-	Enemy* enemy1 = new Enemy(glm::vec2(randompositionX(), randompositionY()), randomrotation(), glm::vec2(randomsizeX(), randomsizeY()), enemyTexture, 0.0f, glm::radians(0.0f));
+	Enemy* enemy1 = new Enemy(glm::vec2(randomPositionX(), randomPositionY()), randomRotation(), glm::vec2(randomSizeX(), randomSizeY()), enemyTexture, 0.0f, glm::radians(0.0f));
+
 
 	
 
-	Enemy* enemy2 = new Enemy(glm::vec2(randompositionX(), randompositionY()), randomrotation(), glm::vec2(randomsizeX(), randomsizeY()), enemyTexture, 0.0f, glm::radians(0.0f));
+	Enemy* enemy2 = new Enemy(glm::vec2(randomPositionX(), randomPositionY()), randomRotation(), glm::vec2(randomSizeX(), randomSizeY()), enemyTexture, 0.0f, glm::radians(0.0f));
 
-	Enemy* enemy3 = new Enemy(glm::vec2(randompositionX(), randompositionY()), randomrotation(), glm::vec2(randomsizeX(), randomsizeY()), enemyTexture, 0.0f, glm::radians(0.0f));
+	
+
+	Enemy* enemy3 = new Enemy(glm::vec2(randomPositionX(), randomPositionY()), randomRotation(), glm::vec2(randomSizeX(), randomSizeY()), enemyTexture, 0.0f, glm::radians(0.0f));
 	
 	// Add enemy objects to the engine
 	addObject("enemy1", enemy1);
@@ -66,7 +81,7 @@ int main(void) {
 	// Option B: if you want a custom update, keep this but implement myUpdate to forward updates
 	setUpdateFunction(myUpdate);
 
-	setViewplaneWidth(10.0f);
+	
 	setKeyboardHandler(myKeyboardHandler);
 
 
@@ -81,8 +96,9 @@ int main(void) {
 }
 
 void myUpdate(GLFWwindow* window, double tDelta) {
-
-	// Forward updates for objects you care about since setting setUpdateFunction replaces engine's default updater
+	GameObject2D* background = getObject("background");
+	if (background) background->update(tDelta);
+	
 	GameObject2D* player = getObject("player");
 	if (player) player->update(tDelta);
 
@@ -93,24 +109,22 @@ void myUpdate(GLFWwindow* window, double tDelta) {
 	GameObject2D* enemy3 = getObject("enemy3");
 	if (enemy3) enemy3->update(tDelta);
 }
-
-float randompositionX()
-{
+std::mt19937& getRandomEngine() {
 	static std::random_device rd;
-	static std::mt19937 randengine(rd());
-
+	static std::mt19937 engine(rd());
+	return engine;
+}
+float randomPositionX()
+{
 	float planeWidth = getViewplaneWidth();
 	float halfWidth = planeWidth / 2.0f;
 
 	std::uniform_real_distribution<float> distribution(-halfWidth, halfWidth);
-
-	return distribution(randengine);
+	
+	return distribution(getRandomEngine());
 }
-float randompositionY()
+float randomPositionY()
 {
-	static std::random_device rd;
-	static std::mt19937 randengine(rd());
-
 	float planeHeight = getViewplaneHeight();
 	float halfHeight = planeHeight / 2.0f;
 
@@ -120,37 +134,24 @@ float randompositionY()
 
 	std::uniform_real_distribution<float> distribution(startY, endY);
 
-	return distribution(randengine);
+	return distribution(getRandomEngine());
 }
-float randomrotation()
+float randomRotation()
 {
-	static std::random_device rd;
-	static std::mt19937 randengine(rd());
-
 	std::uniform_real_distribution<float> distribution(0.0f, 360.0f);
 
-	return distribution(randengine);
+	return distribution(getRandomEngine());
 }
 
-float randomsizeX()
+float randomSizeX()
 {
-	static std::random_device rd;
-	static std::mt19937 randengine(rd());
-
-	
-
 	std::uniform_real_distribution<float> distribution(0.3, 1.5);
 
-	return distribution(randengine);
+	return distribution(getRandomEngine());
 }
-float randomsizeY()
+float randomSizeY()
 {
-	static std::random_device rd;
-	static std::mt19937 randengine(rd());
-
-
-
 	std::uniform_real_distribution<float> distribution(0.3, 1.5);
 
-	return distribution(randengine);
+	return distribution(getRandomEngine());
 }

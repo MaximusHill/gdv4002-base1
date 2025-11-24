@@ -17,7 +17,7 @@ void GameObject2D::render() {
 
 	glPushMatrix();
 	
-	glTranslatef(position.x, position.y, 0.0f);
+	glTranslatef(position.x, position.y,0.0f);
 	glRotatef(glm::degrees(orientation), 0.0f, 0.0f, 1.0f);
 	glScalef(size.x, size.y, 1.0f);
 
