@@ -8,7 +8,7 @@ private:
 	
 
 public:
-	Background(glm::vec2 initPosition, float initOrientation, glm::vec2 initSize, GLuint initTextureID);
+	Background(glm::vec3 initPosition, float initOrientation, glm::vec2 initSize, GLuint initTextureID);
 
 	void update(double tDelta)override;
 

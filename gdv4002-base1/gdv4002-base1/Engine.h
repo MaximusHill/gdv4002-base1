@@ -94,7 +94,7 @@ GLuint loadTexture(const char* texturePath, TextureProperties texProperties = Te
 // Provide properties to add a new game object.  This takes relevant properties and creates a new GameObject2D object in the game scene.
 GameObject2D* addObject(
 	const char* name,
-	glm::vec2 initPosition = glm::vec2(0.0f, 0.0f),
+	glm::vec3 initPosition = glm::vec3(0.0f, 0.0f,0.0f),
 	float initOrientation = 0.0f,
 	glm::vec2 initSize = glm::vec2(1.0f, 1.0f),
 	const char* texturePath = nullptr,

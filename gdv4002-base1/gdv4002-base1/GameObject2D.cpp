@@ -3,7 +3,7 @@
 GameObject2D::GameObject2D() {
 }
 
-GameObject2D::GameObject2D(glm::vec2 initPosition, float initOrientation, glm::vec2 initSize, GLuint initTextureID) {
+GameObject2D::GameObject2D(glm::vec3 initPosition, float initOrientation, glm::vec2 initSize, GLuint initTextureID) {
 
 	position = initPosition;
 	orientation = initOrientation;
@@ -17,7 +17,7 @@ void GameObject2D::render() {
 
 	glPushMatrix();
 	
-	glTranslatef(position.x, position.y,0.0f);
+	glTranslatef(position.x, position.y,position.z);
 	glRotatef(glm::degrees(orientation), 0.0f, 0.0f, 1.0f);
 	glScalef(size.x, size.y, 1.0f);
 

@@ -2,14 +2,14 @@
 #include "Background.h"
 #include "GameObject2D.h"
 #include "Player.h"
-extern glm::vec2 gravity;
+extern glm::vec3 gravity;
 
-Background::Background(glm::vec2 initPosition, float initOrientation, glm::vec2 initSize, GLuint initTextureID)
+Background::Background(glm::vec3 initPosition, float initOrientation, glm::vec2 initSize, GLuint initTextureID)
  : GameObject2D(initPosition, initOrientation, initSize, initTextureID){
 }
 void Background::update(double tDelta) {
 
-	glm::vec2 F = glm::vec2(0.0f, 0.0f);
+	glm::vec3 F = glm::vec3(0.0f, 0.0f,0.0f);
 
 	F += gravity;
 

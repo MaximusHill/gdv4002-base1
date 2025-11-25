@@ -10,7 +10,7 @@
 // Function prototypes
 void myUpdate(GLFWwindow* window, double tDelta);
 void myKeyboardHandler(GLFWwindow* window, int key, int scancode, int action, int mods);
-glm::vec2 gravity = glm::vec2(0.0f, -0.3f);
+glm::vec3 gravity = glm::vec3(0.0f, -2.3f,0.0f);
 float randomPositionX();
 float randomPositionY();
 float randomSizeX();
@@ -19,6 +19,7 @@ float randomRotation();
 
 
 int main(void) {
+	
 	
 	float playerVelocity = 2.0f;
 	
@@ -44,36 +45,39 @@ int main(void) {
 
 	GLuint playerTexture = loadTexture("Resources\\Textures\\player1_ship.png");
 	
-	Player* mainPlayer = new Player(glm::vec2(0.0f, 0.0f), 0.0f, glm::vec2(0.5f, 0.5f), playerTexture, 0.5f);
+	Player* mainPlayer = new Player(glm::vec3(0.0f, 0.0f,1.0f), 0.0f, glm::vec2(0.5f, 0.5f), playerTexture, 0.5f);
 
-	Background* background = new Background(glm::vec2(0.0f, 0.0f), 0.0f, glm::vec2(backGroundWidth, backGroundHeight), backgroundTexture);
+	Background* background = new Background(glm::vec3(0.0f, 0.0f,0.0f), 0.0f, glm::vec2(backGroundWidth, backGroundHeight), backgroundTexture);
 
-	addObject("background", background);
+	
 
 	addObject("player", mainPlayer);
 
-	
+	addObject("background", background);
 
 	GLuint enemyTexture = loadTexture("Resources\\Textures\\asteroid.png");
 	
 	// 2. Create enemy objects
-	Enemy* enemy1 = new Enemy(glm::vec2(randomPositionX(), randomPositionY()), randomRotation(), glm::vec2(randomSizeX(), randomSizeY()), enemyTexture, 0.0f, glm::radians(0.0f));
+	Enemy* enemy1 = new Enemy(glm::vec3(randomPositionX(), randomPositionY(),0.5f), randomRotation(), glm::vec2(randomSizeX(), randomSizeY()), enemyTexture, 0.0f, glm::radians(0.0f));
 
 
 	
 
-	Enemy* enemy2 = new Enemy(glm::vec2(randomPositionX(), randomPositionY()), randomRotation(), glm::vec2(randomSizeX(), randomSizeY()), enemyTexture, 0.0f, glm::radians(0.0f));
+	Enemy* enemy2 = new Enemy(glm::vec3(randomPositionX(), randomPositionY(),0.5f), randomRotation(), glm::vec2(randomSizeX(), randomSizeY()), enemyTexture, 0.0f, glm::radians(0.0f));
 
 	
 
-	Enemy* enemy3 = new Enemy(glm::vec2(randomPositionX(), randomPositionY()), randomRotation(), glm::vec2(randomSizeX(), randomSizeY()), enemyTexture, 0.0f, glm::radians(0.0f));
+	Enemy* enemy3 = new Enemy(glm::vec3(randomPositionX(), randomPositionY(),0.5f), randomRotation(), glm::vec2(randomSizeX(), randomSizeY()), enemyTexture, 0.0f, glm::radians(0.0f));
 	
 	// Add enemy objects to the engine
+
 	addObject("enemy1", enemy1);
 	addObject("enemy2", enemy2);
 	addObject("enemy3", enemy3);
 	
+	
 
+	
 	
 	// Option A: don't override update -> comment out the next line to use engine's default updater
 	// setUpdateFunction(myUpdate);

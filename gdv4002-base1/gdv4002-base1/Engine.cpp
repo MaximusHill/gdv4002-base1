@@ -97,8 +97,10 @@ int engineInit(const char* windowTitle, int initWidth, int initHeight, float ini
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
 	glFrontFace(GL_CCW);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	// Initialise main game clock (starts by default)
+	// Initialise main game clock (starts by default)wwww
 	gameClock = new GUClock();
 
 	return 0; // success
@@ -214,7 +216,7 @@ GLuint loadTexture(const char* texturePath, TextureProperties texProperties) {
 }
 
 
-GameObject2D* addObject(const char* name, glm::vec2 initPosition, float initOrientation, glm::vec2 initSize, const char* texturePath, TextureProperties texProperties) {
+GameObject2D* addObject(const char* name, glm::vec3 initPosition, float initOrientation, glm::vec2 initSize, const char* texturePath, TextureProperties texProperties) {
 
 	// Setup texture
 	GLuint texture = loadTexture(texturePath, texProperties);
@@ -515,9 +517,12 @@ void defaultRenderScene()
 		auto objectIterator = gameObjects.begin();
 
 		while (objectIterator != gameObjects.end()) {
+		
+				objectIterator->second->render();
+			
 
-			objectIterator->second->render();
 			objectIterator++;
+			
 		}
 
 	}
