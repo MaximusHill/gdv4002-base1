@@ -7,6 +7,7 @@
 #include "Enemy.h"
 #include <random>
 #include "Background.h"
+extern Player* player;
 // Function prototypes
 void myUpdate(GLFWwindow* window, double tDelta);
 void myKeyboardHandler(GLFWwindow* window, int key, int scancode, int action, int mods);
@@ -16,10 +17,10 @@ float randomPositionY();
 float randomSizeX();
 float randomSizeY();
 float randomRotation();
-
+GLuint randomEnemyTexture();
 
 int main(void) {
-	
+	hideAxisLines();
 	
 	float playerVelocity = 2.0f;
 	
@@ -34,40 +35,63 @@ int main(void) {
 	}
 	setViewplaneWidth(10.0f);
 
-	GLuint backgroundTexture = loadTexture("Resources\\Textures\\Background.png");
+	GLuint backgroundTexture = loadTexture("Resources\\Textures\\background3.png");
 
 	printf("Background texture ID = %u\n", backgroundTexture);
 
-	float backGroundHeight = getViewplaneHeight() * 1.0f;
-	float backGroundWidth = getViewplaneWidth()*1.0f;
+	float backGroundHeight = getViewplaneHeight();
+	float backGroundWidth = getViewplaneWidth();
 
 	
 
 	GLuint playerTexture = loadTexture("Resources\\Textures\\player1_ship.png");
 	
 	Player* mainPlayer = new Player(glm::vec3(0.0f, 0.0f,1.0f), 0.0f, glm::vec2(0.5f, 0.5f), playerTexture, 0.5f);
+	player = mainPlayer;
 
-	Background* background = new Background(glm::vec3(0.0f, 0.0f,0.0f), 0.0f, glm::vec2(backGroundWidth, backGroundHeight), backgroundTexture);
-
-	
 
 	addObject("player", mainPlayer);
+	Background* background = new Background(glm::vec3(0.0f, 0.0f,0.0f), 0.0f, glm::vec2(backGroundWidth, backGroundHeight), backgroundTexture);
+
+	Background* backgroundLeft = new Background(glm::vec3(getViewplaneWidth(), 0.0f, 0.0f), 0.0f, glm::vec2(backGroundWidth, backGroundHeight), backgroundTexture);
+
+	Background* backgroundRight = new Background(glm::vec3(-getViewplaneWidth(), 0.0f, 0.0f), 0.0f, glm::vec2(backGroundWidth, backGroundHeight), backgroundTexture);
+
+	Background* backgroundTop = new Background(glm::vec3(0.0f, getViewplaneHeight(), 0.0f), 0.0f, glm::vec2(backGroundWidth, backGroundHeight), backgroundTexture);
+
+	Background* backgroundBottom = new Background(glm::vec3(0.0f, -getViewplaneHeight(), 0.0f), 0.0f, glm::vec2(backGroundWidth, backGroundHeight), backgroundTexture);
+
+	Background* backgroundTopLeft = new Background(glm::vec3(-getViewplaneWidth(), getViewplaneHeight(), 0.0f), 0.0f, glm::vec2(backGroundWidth, backGroundHeight), backgroundTexture);
+
+	Background* backgroundTopRight = new Background(glm::vec3(getViewplaneWidth(), getViewplaneHeight(), 0.0f), 0.0f, glm::vec2(backGroundWidth, backGroundHeight), backgroundTexture);
+
+	Background* backgroundBottomLeft = new Background(glm::vec3(-getViewplaneWidth(), -getViewplaneHeight(), 0.0f), 0.0f, glm::vec2(backGroundWidth, backGroundHeight), backgroundTexture);
+
+	Background* backgroundBottomRight = new Background(glm::vec3(getViewplaneWidth(), -getViewplaneHeight(), 0.0f), 0.0f, glm::vec2(backGroundWidth, backGroundHeight), backgroundTexture);
+
 
 	addObject("background", background);
-
-	GLuint enemyTexture = loadTexture("Resources\\Textures\\asteroid.png");
+	addObject("backgroundLeft", backgroundLeft);
+	addObject("backgroundRight", backgroundRight);
+	addObject("backgroundTop", backgroundTop);
+	addObject("backgroundBottom", backgroundBottom);
+	addObject("backgroundTopLeft", backgroundTopLeft);
+	addObject("backgroundTopRight", backgroundTopRight);
+	addObject("backgroundBottomLeft", backgroundBottomLeft);
+	addObject("backgroundBottomRight", backgroundBottomRight);
+	
 	
 	// 2. Create enemy objects
-	Enemy* enemy1 = new Enemy(glm::vec3(randomPositionX(), randomPositionY(),0.5f), randomRotation(), glm::vec2(randomSizeX(), randomSizeY()), enemyTexture, 0.0f, glm::radians(0.0f));
+	Enemy* enemy1 = new Enemy(glm::vec3(randomPositionX(), randomPositionY(),0.5f), randomRotation(), glm::vec2(randomSizeX(), randomSizeY()), randomEnemyTexture() , 0.0f, glm::radians(0.0f));
 
 
 	
 
-	Enemy* enemy2 = new Enemy(glm::vec3(randomPositionX(), randomPositionY(),0.5f), randomRotation(), glm::vec2(randomSizeX(), randomSizeY()), enemyTexture, 0.0f, glm::radians(0.0f));
+	Enemy* enemy2 = new Enemy(glm::vec3(randomPositionX(), randomPositionY(),0.5f), randomRotation(), glm::vec2(randomSizeX(), randomSizeY()), randomEnemyTexture(), 0.0f, glm::radians(0.0f));
 
 	
 
-	Enemy* enemy3 = new Enemy(glm::vec3(randomPositionX(), randomPositionY(),0.5f), randomRotation(), glm::vec2(randomSizeX(), randomSizeY()), enemyTexture, 0.0f, glm::radians(0.0f));
+	Enemy* enemy3 = new Enemy(glm::vec3(randomPositionX(), randomPositionY(),0.5f), randomRotation(), glm::vec2(randomSizeX(), randomSizeY()), randomEnemyTexture(), 0.0f, glm::radians(0.0f));
 	
 	// Add enemy objects to the engine
 
@@ -75,8 +99,6 @@ int main(void) {
 	addObject("enemy2", enemy2);
 	addObject("enemy3", enemy3);
 	
-	
-
 	
 	
 	// Option A: don't override update -> comment out the next line to use engine's default updater
@@ -102,7 +124,32 @@ int main(void) {
 void myUpdate(GLFWwindow* window, double tDelta) {
 	GameObject2D* background = getObject("background");
 	if (background) background->update(tDelta);
-	
+
+	GameObject2D* backgroundLeft = getObject("backgroundLeft");
+	if (backgroundLeft) backgroundLeft->update(tDelta);
+
+	GameObject2D* backgroundRight = getObject("backgroundRight");
+	if (backgroundRight) backgroundRight->update(tDelta);
+
+	GameObject2D* backgroundTop = getObject("backgroundTop");
+	if (backgroundTop) backgroundTop->update(tDelta);
+
+	GameObject2D* backgroundBottom = getObject("backgroundBottom");
+	if (backgroundBottom) backgroundBottom->update(tDelta);
+
+	GameObject2D* backgroundTopLeft = getObject("backgroundTopLeft");
+	if (backgroundTopLeft) backgroundTopLeft->update(tDelta);
+
+	GameObject2D* backgroundTopRight = getObject("backgroundTopRight");
+	if (backgroundTopRight) backgroundTopRight->update(tDelta);
+
+	GameObject2D* backgroundBottomLeft = getObject("backgroundBottomLeft");
+	if (backgroundBottomLeft) backgroundBottomLeft->update(tDelta);
+
+	GameObject2D* backgroundBottomRight = getObject("backgroundBottomRight");
+	if (backgroundBottomRight) backgroundBottomRight->update(tDelta);
+
+
 	GameObject2D* player = getObject("player");
 	if (player) player->update(tDelta);
 
@@ -112,6 +159,7 @@ void myUpdate(GLFWwindow* window, double tDelta) {
 	if (enemy2) enemy2->update(tDelta);
 	GameObject2D* enemy3 = getObject("enemy3");
 	if (enemy3) enemy3->update(tDelta);
+
 }
 std::mt19937& getRandomEngine() {
 	static std::random_device rd;
@@ -159,3 +207,31 @@ float randomSizeY()
 
 	return distribution(getRandomEngine());
 }
+GLuint randomEnemyTexture()
+{
+	
+
+	std::uniform_int_distribution<int> distribution(0, 2);
+
+	float engine = distribution(getRandomEngine());
+
+	if (engine == 0)
+	{
+		return loadTexture("Resources\\Textures\\asteroid1.png");
+	}
+	else if (engine == 1)
+	{
+		return  loadTexture("Resources\\Textures\\asteroid2.png");
+	}
+	else if (engine == 2)
+	{
+		 return loadTexture("Resources\\Textures\\asteroid3.png");
+	}
+	else
+	{
+		return 0;
+	}
+
+	
+}
+

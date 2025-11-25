@@ -4,12 +4,12 @@
 #include "GameObject2D.h"
 #include "Engine.h"
 #include "Background.h"
-
+Player* player;
 std::bitset<5> keys{ 0x0 };
 Player::Player(glm::vec3 initPosition, float initOrientation, glm::vec2 initSize, GLuint initTextureID, float mass) : GameObject2D(initPosition, initOrientation, initSize, initTextureID) {
-
+	
 	this->mass = mass;
-
+	
 	velocity = glm::vec3(0.0f, 0.0f,0.0f); 
 }
 void Player::update(double tDelta) {
@@ -60,10 +60,12 @@ void Player::update(double tDelta) {
 	if (keys.test(Key::SPACE) == true) {
 		
 	}
+	
 	glm::vec3 a = F * (1.0f / mass);
 	velocity = velocity + (a * (float)tDelta);
 	position = position + (velocity * (float)tDelta);
 }
+
 void myKeyboardHandler(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
 	// Check if the key was just pressed

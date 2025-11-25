@@ -6,7 +6,6 @@ class Background : public GameObject2D {
 
 private:
 	
-
 public:
 	Background(glm::vec3 initPosition, float initOrientation, glm::vec2 initSize, GLuint initTextureID);
 
