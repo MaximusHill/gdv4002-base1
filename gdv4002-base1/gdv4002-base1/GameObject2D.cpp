@@ -3,12 +3,13 @@
 GameObject2D::GameObject2D() {
 }
 
-GameObject2D::GameObject2D(glm::vec3 initPosition, float initOrientation, glm::vec2 initSize, GLuint initTextureID) {
+GameObject2D::GameObject2D(glm::vec3 initPosition, float initOrientation, glm::vec2 initSize, GLuint initTextureID, bool initUsesAlpha) {
 
 	position = initPosition;
 	orientation = initOrientation;
 	size = initSize;
 	textureID = initTextureID;
+	usesAlpha = initUsesAlpha;
 }
 
 void GameObject2D::render() {

@@ -1,4 +1,6 @@
 #include "Engine.h"
+#include <vector>
+#include <algorithm>
 
 // Engine.cpp ver 1.1
 
@@ -15,6 +17,7 @@ static float viewplaneAspect = 1.0f;
 
 // Store single copy of textures in map - use path as key so don't load same texture more than once
 static std::map<std::string, GLuint> textureLib;
+static std::map<std::string, bool> textureHasAlpha; // cache whether a texture has alpha (true => treat as transparent)
 
 // Store objects with a name key
 static std::map<std::string, GameObject2D*> gameObjects;
@@ -91,13 +94,12 @@ int engineInit(const char* windowTitle, int initWidth, int initHeight, float ini
 	defaultResizeWindow(window, initWidth, initHeight);
 
 	// Initialise scene - geometry and shaders etc
-	glClearColor(0.0f, 0.0f, 1.0f, 0.0f); // setup background colour to be black
-
+	glClearColor(0.0f, 0.0f, 0.0f, 0.0f); // setup background colour to be black
+	glEnable(GL_BLEND);
 	glEnable(GL_CULL_FACE);
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
 	glFrontFace(GL_CCW);
-	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	// Initialise main game clock (starts by default)wwww
@@ -206,12 +208,31 @@ GLuint loadTexture(const char* texturePath, TextureProperties texProperties) {
 			if (texture > 0) {
 
 				textureLib[texturePath] = texture;
+
+				// Query the texture to determine if it has an alpha-capable internal format
+				GLint prevTex = 0;
+				GLint internalFmt = 0;
+				glGetIntegerv(GL_TEXTURE_BINDING_2D, &prevTex);
+				glBindTexture(GL_TEXTURE_2D, texture);
+				glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_INTERNAL_FORMAT, &internalFmt);
+
+				bool hasAlpha = (internalFmt == GL_RGBA ||
+								 internalFmt == GL_RGBA4 ||
+								 internalFmt == GL_RGBA8 ||
+								 internalFmt == GL_RGBA16 ||
+								 internalFmt == GL_RGBA16F ||
+								 internalFmt == GL_RGBA32F ||
+								 internalFmt == GL_COMPRESSED_RGBA ||
+								 internalFmt == GL_COMPRESSED_RGBA_S3TC_DXT5_EXT);
+
+				textureHasAlpha[texturePath] = hasAlpha;
+
+				// restore previous binding
+				glBindTexture(GL_TEXTURE_2D, (GLuint)prevTex);
 			}
 		}
 	}
 	
-	
-
 	return texture;
 }
 
@@ -222,7 +243,11 @@ GameObject2D* addObject(const char* name, glm::vec3 initPosition, float initOrie
 	GLuint texture = loadTexture(texturePath, texProperties);
 
 	// Create new object
-	GameObject2D* newObject = new GameObject2D(initPosition, initOrientation, initSize, texture);
+	bool usesAlpha = false;
+	if (texturePath != nullptr && textureHasAlpha.find(texturePath) != textureHasAlpha.end()) {
+		usesAlpha = textureHasAlpha[texturePath];
+	}
+	GameObject2D* newObject = new GameObject2D(initPosition, initOrientation, initSize, texture, usesAlpha);
 
 	return addObject(name, newObject);
 
@@ -249,6 +274,29 @@ GameObject2D* addObject(const char* name, GameObject2D* newObject) {
 			// name does exist so increase count
 			objectCount[name] = objectCount[name] + 1; // pre-increment count against 'name'
 			keyString = string(name) + to_string(objectCount[name]);
+		}
+
+		// If caller provided a GameObject2D* (e.g. Player, Enemy, Lives) try to determine whether its texture uses alpha.
+		if (newObject->textureID > 0) {
+			GLint prevTex = 0;
+			GLint internalFmt = 0;
+			glGetIntegerv(GL_TEXTURE_BINDING_2D, &prevTex);
+			glBindTexture(GL_TEXTURE_2D, newObject->textureID);
+			glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_INTERNAL_FORMAT, &internalFmt);
+
+			bool hasAlpha = (internalFmt == GL_RGBA ||
+							 internalFmt == GL_RGBA4 ||
+							 internalFmt == GL_RGBA8 ||
+							 internalFmt == GL_RGBA16 ||
+							 internalFmt == GL_RGBA16F ||
+							 internalFmt == GL_RGBA32F ||
+							 internalFmt == GL_COMPRESSED_RGBA ||
+							 internalFmt == GL_COMPRESSED_RGBA_S3TC_DXT5_EXT);
+
+			newObject->usesAlpha = hasAlpha;
+
+			// restore previous binding
+			glBindTexture(GL_TEXTURE_2D, (GLuint)prevTex);
 		}
 
 		// Store object
@@ -306,167 +354,6 @@ GameObjectCollection getObjectCollection(const char* key) {
 	}
 }
 
-
-// Delete the game object with key 'key' and return true if successful, false otherwise.  This matches key *exactly*, it does not do a partial match
-bool deleteObject(const char* key) {
-
-	auto iter = gameObjects.find(key);
-
-	if (iter != gameObjects.end()) {
-
-		// Object to delete found - first store key string
-		string objKey = iter->first;
-
-		// ...the delete from gameObjects.
-		gameObjects.erase(iter);
-
-		// Now we need to string-match objKey to the objectCount array.
-		// objectCount keys are a substring of gameObject keys that have numbers appended to differentiate.
-		// When found we decrememt the count.  If it reaches zero erase the key from the count array
-		for (auto countIter = objectCount.begin(); countIter != objectCount.end(); countIter++) {
-
-			if (objKey.find(countIter->first) != std::string::npos) {
-
-				countIter->second = countIter->second - 1; // decrement count
-
-				if (countIter->second == 0) {
-
-					objectCount.erase(countIter);
-				}
-
-				break;
-			}
-		}
-
-		return true;
-	}
-	else {
-
-		return false;
-	}
-}
-
-// Delete the game object pointed to by objectPtr and return true if successful, false otherwise.  It is assumed 1 instance if each objectPtr exists in the object list maintained by the engine.  If this is not the case then the first instance of the pointer only is deleted.
-bool deleteObject(GameObject2D* objectPtr) {
-
-	bool objectErased = false;
-
-	for (auto iter = gameObjects.begin(); iter != gameObjects.end(); iter++) {
-
-		if (iter->second == objectPtr) {
-
-			// Object to delete found - first store key string
-			string objKey = iter->first;
-
-			// ...the delete from gameObjects.
-			gameObjects.erase(iter);
-			objectErased = true;
-
-			// Now we need to string-match objKey to the objectCount array.
-			// objectCount keys are a substring of gameObject keys that have numbers appended to differentiate.
-			// When found we decrememt the count.  If it reaches zero erase the key from the count array
-			for (auto countIter = objectCount.begin(); countIter != objectCount.end(); countIter++) {
-
-				if (objKey.find(countIter->first) != std::string::npos) {
-
-					countIter->second = countIter->second - 1; // decrement count
-
-					if (countIter->second == 0) {
-
-						objectCount.erase(countIter);
-					}
-
-					break;
-				}
-			}
-
-			break;
-		}
-	}
-
-	return objectErased;
-}
-
-// Delete any object where the key partially matches 'key'.  Unlike deleteObject, this can be used to remove groups of like-named objects.  The function returns 0 if no objects matched and nothing was deleted, otherwise it returns the number of elements removed.
-int deleteMatchingObjects(const char* key) {
-
-	int eraseCount = 0;
-
-	for (auto iter = gameObjects.begin(); iter != gameObjects.end();) {
-
-		if (iter->first.find(key) != std::string::npos) {
-
-			// Object to delete found - first store key string
-			string objKey = iter->first;
-
-			// ...the delete from gameObjects.
-			iter = gameObjects.erase(iter);
-			eraseCount++;
-
-			// Now we need to string-match objKey to the objectCount array.
-			// objectCount keys are a substring of gameObject keys that have numbers appended to differentiate.
-			// When found we decrememt the count.  If it reaches zero erase the key from the count array
-			for (auto countIter = objectCount.begin(); countIter != objectCount.end(); countIter++) {
-
-				if (objKey.find(countIter->first) != std::string::npos) {
-
-					countIter->second = countIter->second - 1; // decrement count
-
-					if (countIter->second == 0) {
-
-						objectCount.erase(countIter);
-					}
-
-					break;
-				}
-			}
-		}
-		else {
-
-			iter++;
-		}
-	}
-
-	return eraseCount;
-}
-
-
-void showAxisLines() {
-
-	_showAxisLines = true;
-}
-
-void hideAxisLines() {
-
-	_showAxisLines = false;
-}
-
-bool axisLinesVisible() {
-
-	return _showAxisLines;
-}
-
-void setBackgroundColour(glm::vec4& newColour) {
-
-	backgroundColour = newColour;
-}
-
-void setViewplaneWidth(float newWidth) {
-
-	viewplaneSize.x = newWidth;
-	viewplaneSize.y = viewplaneSize.x * viewplaneAspect;
-}
-
-float getViewplaneWidth() {
-
-	return viewplaneSize.x;
-}
-
-float getViewplaneHeight() {
-
-	return viewplaneSize.y;
-}
-
 #pragma endregion
 
 
@@ -513,18 +400,46 @@ void defaultRenderScene()
 	else {
 
 		// ...if not set render default scene
+		// Separate objects into opaque and transparent sets using the per-object flag set at addObject time.
+		std::vector<GameObject2D*> opaqueList;
+		std::vector<GameObject2D*> transparentList;
 
-		auto objectIterator = gameObjects.begin();
+		for (auto &kv : gameObjects) {
+			GameObject2D* obj = kv.second;
+			if (!obj) continue;
 
-		while (objectIterator != gameObjects.end()) {
-		
-				objectIterator->second->render();
-			
-
-			objectIterator++;
-			
+			if (obj->usesAlpha) transparentList.push_back(obj);
+			else opaqueList.push_back(obj);
 		}
 
+		// Render opaque objects first (depth writes enabled, blending disabled)
+		glDisable(GL_BLEND);
+		glEnable(GL_DEPTH_TEST);
+		glDepthMask(GL_TRUE);
+
+		for (auto obj : opaqueList) {
+			if (obj) obj->render();
+		}
+
+		// Render transparent objects last (back-to-front), disable depth writes
+		std::sort(transparentList.begin(), transparentList.end(), [](GameObject2D* a, GameObject2D* b) {
+			float za = a ? a->position.z : 0.0f;
+			float zb = b ? b->position.z : 0.0f;
+			return za > zb; // far -> near
+		});
+
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glDepthMask(GL_FALSE);
+		glEnable(GL_DEPTH_TEST);
+
+		for (auto obj : transparentList) {
+			if (obj) obj->render();
+		}
+
+		// restore state
+		glDepthMask(GL_TRUE);
+		glDisable(GL_BLEND);
 	}
 }
 
@@ -596,5 +511,36 @@ void listGameObjectKeys() {
 }
 
 #pragma endregion
+
+// Restore these engine utility functions so other objects link correctly.
+
+void showAxisLines() {
+	_showAxisLines = true;
+}
+
+void hideAxisLines() {
+	_showAxisLines = false;
+}
+
+bool axisLinesVisible() {
+	return _showAxisLines;
+}
+
+void setBackgroundColour(glm::vec4& newColour) {
+	backgroundColour = newColour;
+}
+
+void setViewplaneWidth(float newWidth) {
+	viewplaneSize.x = newWidth;
+	viewplaneSize.y = viewplaneSize.x * viewplaneAspect;
+}
+
+float getViewplaneWidth() {
+	return viewplaneSize.x;
+}
+
+float getViewplaneHeight() {
+	return viewplaneSize.y;
+}
 
 

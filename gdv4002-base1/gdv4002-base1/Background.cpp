@@ -10,7 +10,7 @@ Background::Background(glm::vec3 initPosition, float initOrientation, glm::vec2 
 	
 }
 void Background::update(double tDelta) {
-
+	usesAlpha = false;
 	glm::vec3 F = glm::vec3(0.0f, 0.0f,0.0f);
 
 	F += gravity;

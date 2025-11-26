@@ -7,6 +7,7 @@
 #include "Enemy.h"
 #include <random>
 #include "Background.h"
+#include "Lives.h"
 extern Player* player;
 // Function prototypes
 void myUpdate(GLFWwindow* window, double tDelta);
@@ -24,51 +25,43 @@ int main(void) {
 	
 	float playerVelocity = 2.0f;
 	
-	// Initialise the engine (create window, setup OpenGL backend)
 	int initResult = engineInit("GDV4002 - Applied Maths for Games", 1024, 1024);
 
-	// If the engine initialisation failed report error and exit
+	setViewplaneWidth(10.0f);
+	float backGroundHeight = getViewplaneHeight();
+	float backGroundWidth = getViewplaneWidth();
 	if (initResult != 0) {
 
 		printf("Cannot setup game window!!!\n");
-		return initResult; // exit if setup failed
+		return initResult;
 	}
-	setViewplaneWidth(10.0f);
+
 
 	GLuint backgroundTexture = loadTexture("Resources\\Textures\\background3.png");
 
-	printf("Background texture ID = %u\n", backgroundTexture);
-
-	float backGroundHeight = getViewplaneHeight();
-	float backGroundWidth = getViewplaneWidth();
-
-	
-
 	GLuint playerTexture = loadTexture("Resources\\Textures\\player1_ship.png");
 	
-	Player* mainPlayer = new Player(glm::vec3(0.0f, 0.0f,1.0f), 0.0f, glm::vec2(0.5f, 0.5f), playerTexture, 0.5f);
+	Player* mainPlayer = new Player(glm::vec3(0.0f, 0.0f,0.5f), 0.0f, glm::vec2(0.5f, 0.5f), playerTexture, 0.5f);
 	player = mainPlayer;
-
-
 	addObject("player", mainPlayer);
-	Background* background = new Background(glm::vec3(0.0f, 0.0f,0.0f), 0.0f, glm::vec2(backGroundWidth, backGroundHeight), backgroundTexture);
 
-	Background* backgroundLeft = new Background(glm::vec3(getViewplaneWidth(), 0.0f, 0.0f), 0.0f, glm::vec2(backGroundWidth, backGroundHeight), backgroundTexture);
+	Background* background = new Background(glm::vec3(0.0f, 0.0f, -0.5f), 0.0f, glm::vec2(backGroundWidth, backGroundHeight), backgroundTexture);
 
-	Background* backgroundRight = new Background(glm::vec3(-getViewplaneWidth(), 0.0f, 0.0f), 0.0f, glm::vec2(backGroundWidth, backGroundHeight), backgroundTexture);
+	Background* backgroundLeft = new Background(glm::vec3(getViewplaneWidth(), 0.0f, -0.5f), 0.0f, glm::vec2(backGroundWidth, backGroundHeight), backgroundTexture);
 
-	Background* backgroundTop = new Background(glm::vec3(0.0f, getViewplaneHeight(), 0.0f), 0.0f, glm::vec2(backGroundWidth, backGroundHeight), backgroundTexture);
+	Background* backgroundRight = new Background(glm::vec3(-getViewplaneWidth(), 0.0f, -0.5f), 0.0f, glm::vec2(backGroundWidth, backGroundHeight), backgroundTexture);
 
-	Background* backgroundBottom = new Background(glm::vec3(0.0f, -getViewplaneHeight(), 0.0f), 0.0f, glm::vec2(backGroundWidth, backGroundHeight), backgroundTexture);
+	Background* backgroundTop = new Background(glm::vec3(0.0f, getViewplaneHeight(), -0.5f), 0.0f, glm::vec2(backGroundWidth, backGroundHeight), backgroundTexture);
 
-	Background* backgroundTopLeft = new Background(glm::vec3(-getViewplaneWidth(), getViewplaneHeight(), 0.0f), 0.0f, glm::vec2(backGroundWidth, backGroundHeight), backgroundTexture);
+	Background* backgroundBottom = new Background(glm::vec3(0.0f, -getViewplaneHeight(), -0.5f), 0.0f, glm::vec2(backGroundWidth, backGroundHeight), backgroundTexture);
 
-	Background* backgroundTopRight = new Background(glm::vec3(getViewplaneWidth(), getViewplaneHeight(), 0.0f), 0.0f, glm::vec2(backGroundWidth, backGroundHeight), backgroundTexture);
+	Background* backgroundTopLeft = new Background(glm::vec3(-getViewplaneWidth(), getViewplaneHeight(), -0.5f), 0.0f, glm::vec2(backGroundWidth, backGroundHeight), backgroundTexture);
 
-	Background* backgroundBottomLeft = new Background(glm::vec3(-getViewplaneWidth(), -getViewplaneHeight(), 0.0f), 0.0f, glm::vec2(backGroundWidth, backGroundHeight), backgroundTexture);
+	Background* backgroundTopRight = new Background(glm::vec3(getViewplaneWidth(), getViewplaneHeight(), -0.5f), 0.0f, glm::vec2(backGroundWidth, backGroundHeight), backgroundTexture);
 
-	Background* backgroundBottomRight = new Background(glm::vec3(getViewplaneWidth(), -getViewplaneHeight(), 0.0f), 0.0f, glm::vec2(backGroundWidth, backGroundHeight), backgroundTexture);
+	Background* backgroundBottomLeft = new Background(glm::vec3(-getViewplaneWidth(), -getViewplaneHeight(), -0.5f), 0.0f, glm::vec2(backGroundWidth, backGroundHeight), backgroundTexture);
 
+	Background* backgroundBottomRight = new Background(glm::vec3(getViewplaneWidth(), -getViewplaneHeight(), -0.5f), 0.0f, glm::vec2(backGroundWidth, backGroundHeight), backgroundTexture);
 
 	addObject("background", background);
 	addObject("backgroundLeft", backgroundLeft);
@@ -79,45 +72,45 @@ int main(void) {
 	addObject("backgroundTopRight", backgroundTopRight);
 	addObject("backgroundBottomLeft", backgroundBottomLeft);
 	addObject("backgroundBottomRight", backgroundBottomRight);
+
+	GLuint AliveTexture = loadTexture("Resources\\Textures\\Alive.png");
+
+	GLuint DeadTexture = loadTexture("Resources\\Textures\\Dead.png");
 	
-	
-	// 2. Create enemy objects
+	Lives* Life3 = new Lives(glm::vec3(getViewplaneWidth()-5.5f, getViewplaneHeight()- 5.5f, 0.0f), 0.0f, glm::vec2(0.5f, 0.5f), AliveTexture);
+
+	Lives* Life2 = new Lives(glm::vec3(getViewplaneWidth()-6.5f, getViewplaneHeight() - 5.5f, 0.0f), 0.0f, glm::vec2(0.5f, 0.5f), AliveTexture);
+
+	Lives* Life1 = new Lives(glm::vec3(getViewplaneWidth()-7.5f, getViewplaneHeight() - 5.5f, 0.0f), 0.0f, glm::vec2(0.5f, 0.5f), AliveTexture);
+
+	addObject("Life1", Life1);
+	addObject("Life2", Life2);
+	addObject("Life3", Life3);
+
 	Enemy* enemy1 = new Enemy(glm::vec3(randomPositionX(), randomPositionY(),0.5f), randomRotation(), glm::vec2(randomSizeX(), randomSizeY()), randomEnemyTexture() , 0.0f, glm::radians(0.0f));
-
-
-	
 
 	Enemy* enemy2 = new Enemy(glm::vec3(randomPositionX(), randomPositionY(),0.5f), randomRotation(), glm::vec2(randomSizeX(), randomSizeY()), randomEnemyTexture(), 0.0f, glm::radians(0.0f));
 
-	
-
 	Enemy* enemy3 = new Enemy(glm::vec3(randomPositionX(), randomPositionY(),0.5f), randomRotation(), glm::vec2(randomSizeX(), randomSizeY()), randomEnemyTexture(), 0.0f, glm::radians(0.0f));
 	
-	// Add enemy objects to the engine
-
 	addObject("enemy1", enemy1);
 	addObject("enemy2", enemy2);
 	addObject("enemy3", enemy3);
 	
-	
-	
-	// Option A: don't override update -> comment out the next line to use engine's default updater
-	// setUpdateFunction(myUpdate);
 
-	// Option B: if you want a custom update, keep this but implement myUpdate to forward updates
 	setUpdateFunction(myUpdate);
 
 	
 	setKeyboardHandler(myKeyboardHandler);
 
 
-	// Enter main loop - this handles update and render calls
+
 	engineMainLoop();
 
-	// When we quit (close window for example), clean up engine resources
+
 	engineShutdown();
 
-	// return success :)
+	
 	return 0;
 }
 
@@ -149,6 +142,14 @@ void myUpdate(GLFWwindow* window, double tDelta) {
 	GameObject2D* backgroundBottomRight = getObject("backgroundBottomRight");
 	if (backgroundBottomRight) backgroundBottomRight->update(tDelta);
 
+	GameObject2D* Life1 = getObject("Life1");
+	if (Life1) Life1->update(tDelta);
+
+	GameObject2D* Life2 = getObject("Life2");
+	if (Life2) Life2->update(tDelta);
+
+	GameObject2D* Life3 = getObject("Life3");
+	if (Life3) Life3->update(tDelta);
 
 	GameObject2D* player = getObject("player");
 	if (player) player->update(tDelta);

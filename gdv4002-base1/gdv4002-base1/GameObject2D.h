@@ -18,8 +18,11 @@ public:
 	// textureID for assigned "sprite" image
 	GLuint			textureID;
 
+	// Indicates whether the object's assigned texture uses alpha (transparency)
+	bool			usesAlpha = false;
+
 	GameObject2D();
-	GameObject2D(glm::vec3 initPosition, float initOrientation, glm::vec2 initSize, GLuint initTextureID);
+	GameObject2D(glm::vec3 initPosition, float initOrientation, glm::vec2 initSize, GLuint initTextureID, bool initUsesAlpha = false);
 
 	virtual void render();
 	virtual void update(double tDelta);
