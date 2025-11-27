@@ -11,6 +11,7 @@
 #include "glPrint.h"
 extern Player* player;
 // Function prototypes
+
 void myUpdate(GLFWwindow* window, double tDelta);
 void myKeyboardHandler(GLFWwindow* window, int key, int scancode, int action, int mods);
 glm::vec3 gravity = glm::vec3(0.0f, -2.3f,0.0f);
@@ -98,7 +99,6 @@ int main(void) {
 	addObject("enemy1", enemy1);
 	addObject("enemy2", enemy2);
 	addObject("enemy3", enemy3);
-	
 
 
 	setUpdateFunction(myUpdate);
@@ -106,11 +106,9 @@ int main(void) {
 	
 	setKeyboardHandler(myKeyboardHandler);
 
-
-
+	
 	engineMainLoop();
-
-
+	glDeleteFont();
 	engineShutdown();
 
 	
@@ -238,4 +236,3 @@ GLuint randomEnemyTexture()
 
 	
 }
-

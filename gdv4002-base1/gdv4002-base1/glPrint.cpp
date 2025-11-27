@@ -29,7 +29,7 @@ bool glBuildFont(void)
 	}
 
 	// Create font
-	if (!(font = CreateFont(-12,						// Height Of Font
+	if (!(font = CreateFont(-24,						// Height Of Font
 		0,							// Width Of Font
 		0,							// Angle Of Escapement
 		0,							// Orientation Angle
