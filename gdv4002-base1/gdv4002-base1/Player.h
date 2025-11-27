@@ -7,13 +7,15 @@ class Player : public GameObject2D {
 private:
 
 	float		mass;
-	glm::vec3	velocity;
+	
 
 
 public:
 
 	Player(glm::vec3 initPosition, float initOrientation, glm::vec2 initSize, GLuint initTextureID, float mass);
-
+	glm::vec3	velocity;
 	void update(double tDelta) override;
 	glm::vec3 getVelocity() const { return velocity; }
+	float collisionCooldown = 0.0f;
+
 };

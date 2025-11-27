@@ -135,3 +135,24 @@ int getObjectCounts(std::string key);
 //
 void listObjectCounts();
 void listGameObjectKeys();
+
+
+
+
+struct AABB2 {
+	glm::vec2 min; // bottom-left (or min x,y)
+	glm::vec2 max; // top-right (or max x,y)
+};
+
+AABB2 computeAABB(GameObject2D* obj);
+
+
+bool AABBOverlap(const AABB2& a, const AABB2& b);
+
+bool GameObjectAABBCollision(GameObject2D* a, GameObject2D* b);
+
+
+int checkCollisionsBetweenGroups(const char* groupA, const char* groupB, bool printPairs = true);
+
+int checkCollisionsWithinGroup(const char* groupKey, bool printPairs = true);
+

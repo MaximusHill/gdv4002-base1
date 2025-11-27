@@ -9,9 +9,11 @@
 #include "Background.h"
 #include "Lives.h"
 #include "glPrint.h"
+#include "Deaths.h"
+#include "Dying.h"
 extern Player* player;
-// Function prototypes
-
+std::vector<Enemy*> enemies;
+std::vector<Lives*> lives;
 void myUpdate(GLFWwindow* window, double tDelta);
 void myKeyboardHandler(GLFWwindow* window, int key, int scancode, int action, int mods);
 glm::vec3 gravity = glm::vec3(0.0f, -2.3f,0.0f);
@@ -86,20 +88,61 @@ int main(void) {
 
 	Lives* Life1 = new Lives(glm::vec3(getViewplaneWidth()-7.5f, getViewplaneHeight() - 5.5f, 0.0f), 0.0f, glm::vec2(0.5f, 0.5f), AliveTexture);
 
+
+	lives.push_back(Life1);
+	
+	lives.push_back(Life2);
+	lives.push_back(Life3);
 	addObject("Life1", Life1);
 	addObject("Life2", Life2);
-	addObject("Life3", Life3);
-
-	Enemy* enemy1 = new Enemy(glm::vec3(randomPositionX(), randomPositionY(),0.5f), randomRotation(), glm::vec2(randomSizeX(), randomSizeY()), randomEnemyTexture() , 0.0f, glm::radians(0.0f));
-
-	Enemy* enemy2 = new Enemy(glm::vec3(randomPositionX(), randomPositionY(),0.5f), randomRotation(), glm::vec2(randomSizeX(), randomSizeY()), randomEnemyTexture(), 0.0f, glm::radians(0.0f));
-
-	Enemy* enemy3 = new Enemy(glm::vec3(randomPositionX(), randomPositionY(),0.5f), randomRotation(), glm::vec2(randomSizeX(), randomSizeY()), randomEnemyTexture(), 0.0f, glm::radians(0.0f));
+	addObject("Life3", Life3); 
 	
+	Dying* DyingLeft3 = new Dying(glm::vec3(getViewplaneWidth() - 5.5f, getViewplaneHeight() - 5.5f, 0.0f), 0.0f, glm::vec2(0.5f, 0.5f), loadTexture("Resources\\Textures\\Dyingleft.png"));
+
+	Dying* DyingLeft2 = new Dying(glm::vec3(getViewplaneWidth() - 6.5f, getViewplaneHeight() - 5.5f, 0.0f), 0.0f, glm::vec2(0.5f, 0.5f), loadTexture("Resources\\Textures\\Dyingleft.png"));
+
+	Dying* DyingLeft1 = new Dying(glm::vec3(getViewplaneWidth() - 7.5f, getViewplaneHeight() - 5.5f, 0.0f), 0.0f, glm::vec2(0.5f, 0.5f), loadTexture("Resources\\Textures\\Dyingleft.png"));
+
+	addObject("DyingLeft1", DyingLeft1);
+	addObject("DyingLeft2", DyingLeft2);
+	addObject("DyingLeft3", DyingLeft3);
+
+	Dying* DyingRight3 = new Dying(glm::vec3(getViewplaneWidth() - 5.5f, getViewplaneHeight() - 5.5f, 0.0f), 0.0f, glm::vec2(0.5f, 0.5f), loadTexture("Resources\\Textures\\DyingRight.png"));
+
+	Dying* DyingRight2 = new Dying(glm::vec3(getViewplaneWidth() - 6.5f, getViewplaneHeight() - 5.5f, 0.0f), 0.0f, glm::vec2(0.5f, 0.5f), loadTexture("Resources\\Textures\\DyingRight.png"));
+
+	Dying* DyingRight1 = new Dying(glm::vec3(getViewplaneWidth() - 7.5f, getViewplaneHeight() - 5.5f, 0.0f), 0.0f, glm::vec2(0.5f, 0.5f), loadTexture("Resources\\Textures\\DyingRight.png"));
+
+	addObject("DyingRight1", DyingRight1);
+	addObject("DyingRight2", DyingRight2);
+	addObject("DyingRight3", DyingRight3);
+
+	Deaths* Death3 = new Deaths(glm::vec3(getViewplaneWidth() - 5.5f, getViewplaneHeight() - 5.5f, 0.0f), 0.0f, glm::vec2(0.5f, 0.5f), DeadTexture);
+
+	Deaths* Death2 = new Deaths(glm::vec3(getViewplaneWidth() - 6.5f, getViewplaneHeight() - 5.5f, 0.0f), 0.0f, glm::vec2(0.5f, 0.5f), DeadTexture);
+
+	Deaths* Death1 = new Deaths(glm::vec3(getViewplaneWidth() - 7.5f, getViewplaneHeight() - 5.5f, 0.0f), 0.0f, glm::vec2(0.5f, 0.5f), DeadTexture);
+
+	addObject("Death1", Death1);
+	addObject("Death2", Death2);
+	addObject("Death3", Death3);
+	
+	
+
+
+	Enemy* enemy1 = new Enemy(glm::vec3(randomPositionX(), randomPositionY(),0.5f), randomRotation(), glm::vec2(randomSizeX(), randomSizeY()), randomEnemyTexture());
+
+	Enemy* enemy2 = new Enemy(glm::vec3(randomPositionX(), randomPositionY(),0.5f), randomRotation(), glm::vec2(randomSizeX(), randomSizeY()), randomEnemyTexture());
+	
+	Enemy* enemy3 = new Enemy(glm::vec3(randomPositionX(), randomPositionY(),0.5f), randomRotation(), glm::vec2(randomSizeX(), randomSizeY()), randomEnemyTexture());
+	
+
+	enemies.push_back(enemy1);
+	enemies.push_back(enemy2);
+	enemies.push_back(enemy3);
 	addObject("enemy1", enemy1);
 	addObject("enemy2", enemy2);
 	addObject("enemy3", enemy3);
-
 
 	setUpdateFunction(myUpdate);
 
@@ -142,6 +185,24 @@ void myUpdate(GLFWwindow* window, double tDelta) {
 
 	GameObject2D* backgroundBottomRight = getObject("backgroundBottomRight");
 	if (backgroundBottomRight) backgroundBottomRight->update(tDelta);
+
+	GameObject2D* DyingLeft1 = getObject("DyingLeft1");	
+	if (DyingLeft1) DyingLeft1->update(tDelta);
+
+	GameObject2D* DyingLeft2 = getObject("DyingLeft2");
+	if (DyingLeft2) DyingLeft2->update(tDelta);
+
+	GameObject2D* DyingLeft3 = getObject("DyingLeft3");
+	if (DyingLeft3) DyingLeft3->update(tDelta);
+
+	GameObject2D* DyingRight1 = getObject("DyingRight1");
+	if (DyingRight1) DyingRight1->update(tDelta);
+
+	GameObject2D* DyingRight2 = getObject("DyingRight2");
+	if (DyingRight2) DyingRight2->update(tDelta);
+
+	GameObject2D* DyingRight3 = getObject("DyingRight3");
+	if (DyingRight3) DyingRight3->update(tDelta);
 
 	GameObject2D* Life1 = getObject("Life1");
 	if (Life1) Life1->update(tDelta);

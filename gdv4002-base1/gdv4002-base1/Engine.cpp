@@ -543,3 +543,233 @@ float getViewplaneHeight() {
 	return viewplaneSize.y;
 }
 
+bool deleteObject(const char* key) {
+
+	auto iter = gameObjects.find(key);
+
+	if (iter != gameObjects.end()) {
+
+		// Object to delete found - first store key string
+		string objKey = iter->first;
+
+		// ...the delete from gameObjects.
+		gameObjects.erase(iter);
+
+		// Now we need to string-match objKey to the objectCount array.
+		// objectCount keys are a substring of gameObject keys that have numbers appended to differentiate.
+		// When found we decrememt the count.  If it reaches zero erase the key from the count array
+		for (auto countIter = objectCount.begin(); countIter != objectCount.end(); countIter++) {
+
+			if (objKey.find(countIter->first) != std::string::npos) {
+
+				countIter->second = countIter->second - 1; // decrement count
+
+				if (countIter->second == 0) {
+
+					objectCount.erase(countIter);
+				}
+
+				break;
+			}
+		}
+
+		return true;
+	}
+	else {
+
+		return false;
+	}
+}
+
+// Delete the game object pointed to by objectPtr and return true if successful, false otherwise.  It is assumed 1 instance if each objectPtr exists in the object list maintained by the engine.  If this is not the case then the first instance of the pointer only is deleted.
+bool deleteObject(GameObject2D* objectPtr) {
+
+	bool objectErased = false;
+
+	for (auto iter = gameObjects.begin(); iter != gameObjects.end(); iter++) {
+
+		if (iter->second == objectPtr) {
+
+			// Object to delete found - first store key string
+			string objKey = iter->first;
+
+			// ...the delete from gameObjects.
+			gameObjects.erase(iter);
+			objectErased = true;
+
+			// Now we need to string-match objKey to the objectCount array.
+			// objectCount keys are a substring of gameObject keys that have numbers appended to differentiate.
+			// When found we decrememt the count.  If it reaches zero erase the key from the count array
+			for (auto countIter = objectCount.begin(); countIter != objectCount.end(); countIter++) {
+
+				if (objKey.find(countIter->first) != std::string::npos) {
+
+					countIter->second = countIter->second - 1; // decrement count
+
+					if (countIter->second == 0) {
+
+						objectCount.erase(countIter);
+					}
+
+					break;
+				}
+			}
+
+			break;
+		}
+	}
+
+	return objectErased;
+}
+
+// Delete any object where the key partially matches 'key'.  Unlike deleteObject, this can be used to remove groups of like-named objects.  The function returns 0 if no objects matched and nothing was deleted, otherwise it returns the number of elements removed.
+int deleteMatchingObjects(const char* key) {
+
+	int eraseCount = 0;
+
+	for (auto iter = gameObjects.begin(); iter != gameObjects.end();) {
+
+		if (iter->first.find(key) != std::string::npos) {
+
+			// Object to delete found - first store key string
+			string objKey = iter->first;
+
+			// ...the delete from gameObjects.
+			iter = gameObjects.erase(iter);
+			eraseCount++;
+
+			// Now we need to string-match objKey to the objectCount array.
+			// objectCount keys are a substring of gameObject keys that have numbers appended to differentiate.
+			// When found we decrememt the count.  If it reaches zero erase the key from the count array
+			for (auto countIter = objectCount.begin(); countIter != objectCount.end(); countIter++) {
+
+				if (objKey.find(countIter->first) != std::string::npos) {
+
+					countIter->second = countIter->second - 1; // decrement count
+
+					if (countIter->second == 0) {
+
+						objectCount.erase(countIter);
+					}
+
+					break;
+				}
+			}
+		}
+		else {
+
+			iter++;
+		}
+	}
+
+	return eraseCount;
+}
+
+
+AABB2 computeAABB(GameObject2D* obj) {
+
+	AABB2 box;
+	if (!obj) {
+		box.min = glm::vec2(0.0f);
+		box.max = glm::vec2(0.0f);
+		return box;
+	}
+
+	glm::vec2 pos2 = glm::vec2(obj->position.x, obj->position.y);
+	glm::vec2 half = glm::vec2(0.0f, 0.0f);
+
+	
+#ifdef GAMEOBJECT_HAS_SIZE
+	half = obj->size * 0.5f;
+#else
+
+	half = obj->size * 0.5f;
+#endif
+
+	box.min = pos2 - half;
+	box.max = pos2 + half;
+	return box;
+}
+
+bool AABBOverlap(const AABB2& a, const AABB2& b) {
+	// No overlap if one is entirely left/right/up/down of the other
+	if (a.max.x < b.min.x) return false;
+	if (a.min.x > b.max.x) return false;
+	if (a.max.y < b.min.y) return false;
+	if (a.min.y > b.max.y) return false;
+	return true;
+}
+
+bool GameObjectAABBCollision(GameObject2D* a, GameObject2D* b) {
+	if (!a || !b) return false;
+	AABB2 aa = computeAABB(a);
+	AABB2 bb = computeAABB(b);
+	return AABBOverlap(aa, bb);
+}
+
+
+int checkCollisionsBetweenGroups(const char* groupA, const char* groupB, bool printPairs) {
+
+	if (!groupA || !groupB) return 0;
+
+	// get collections (these return copies)
+	GameObjectCollection colA = getObjectCollection(groupA);
+	GameObjectCollection colB = getObjectCollection(groupB);
+
+	if (colA.objectCount == 0 || colB.objectCount == 0) return 0;
+
+	int collisions = 0;
+
+	for (int i = 0; i < colA.objectCount; ++i) {
+		GameObject2D* a = colA.objectArray[i];
+		if (!a) continue;
+
+		for (int j = 0; j < colB.objectCount; ++j) {
+			GameObject2D* b = colB.objectArray[j];
+			if (!b) continue;
+
+			if (GameObjectAABBCollision(a, b)) {
+				collisions++;
+				if (printPairs) {
+		
+					printf("[Collision] %s (addr=%p) <-> %s (addr=%p)\n", groupA, (void*)a, groupB, (void*)b);
+				}
+
+			}
+		}
+	}
+
+	return collisions;
+}
+
+
+int checkCollisionsWithinGroup(const char* groupKey, bool printPairs) {
+	if (!groupKey) return 0;
+	GameObjectCollection col = getObjectCollection(groupKey);
+	if (col.objectCount < 2) return 0;
+
+	int collisions = 0;
+
+	for (int i = 0; i < col.objectCount; ++i) {
+		GameObject2D* a = col.objectArray[i];
+		if (!a) continue;
+
+		for (int j = i + 1; j < col.objectCount; ++j) {
+			GameObject2D* b = col.objectArray[j];
+			if (!b) continue;
+
+			if (GameObjectAABBCollision(a, b)) {
+				collisions++;
+				if (printPairs) {
+					printf("[Collision WithinGroup] %s[%d] addr=%p <-> %s[%d] addr=%p\n",
+						groupKey, i, (void*)a, groupKey, j, (void*)b);
+				}
+			}
+		}
+	}
+
+	return collisions;
+}
+
+
+
