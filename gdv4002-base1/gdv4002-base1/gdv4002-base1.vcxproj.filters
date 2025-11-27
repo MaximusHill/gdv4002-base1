@@ -51,7 +51,7 @@
     <ClCompile Include="Lives.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\glPrint.cpp">
+    <ClCompile Include="glPrint.cpp">
       <Filter>Engine</Filter>
     </ClCompile>
   </ItemGroup>
@@ -92,7 +92,7 @@
     <ClInclude Include="Lives.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\glPrint.h">
+    <ClInclude Include="glPrint.h">
       <Filter>Engine</Filter>
     </ClInclude>
   </ItemGroup>

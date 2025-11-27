@@ -64,6 +64,9 @@ void Player::update(double tDelta) {
 	glm::vec3 a = F * (1.0f / mass);
 	velocity = velocity + (a * (float)tDelta);
 	position = position + (velocity * (float)tDelta);
+
+
+
 }
 
 void myKeyboardHandler(GLFWwindow* window, int key, int scancode, int action, int mods)

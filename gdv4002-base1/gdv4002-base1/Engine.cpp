@@ -2,7 +2,7 @@
 #include <vector>
 #include <algorithm>
 
-// Engine.cpp ver 1.1
+// Engine.cpp ver 1.2
 
 #pragma region Engine variables
 
@@ -31,6 +31,9 @@ static glm::vec4 backgroundColour(0.0f, 0.0f, 0.0f, 1.0f);
 
 static RenderFn overrideRenderFn = nullptr;
 static UpdateFn overrideUpdateFn = nullptr;
+static ResizeFn resizeFn = nullptr;
+
+static bool __overrideUpdate = false;
 
 #pragma endregion
 
@@ -119,10 +122,23 @@ void engineMainLoop() {
 		double tDelta = gameClock->gameTimeDelta();
 
 		// Update game environment
-		if (overrideUpdateFn)
-			overrideUpdateFn(window, tDelta);
-		else
+		if (__overrideUpdate) {
+
+			// override completely the update function call
+			if (overrideUpdateFn != nullptr) {
+				overrideUpdateFn(window, tDelta);
+			}
+		}
+		else {
+
+			// don't override update - call default which calls update on each game object...
 			defaultUpdateScene(tDelta);
+
+			// ...then if an update function is given, call this after the above default update
+			if (overrideUpdateFn != nullptr) {
+				overrideUpdateFn(window, tDelta);
+			}
+		}
 
 		// Render current frame
 		defaultRenderScene();
@@ -174,9 +190,15 @@ void setRenderFunction(RenderFn fn) {
 }
 
 // Set update function - once set our own game update code will be used
-void setUpdateFunction(UpdateFn fn) {
+void setUpdateFunction(UpdateFn fn, bool overrideUpdate) {
 
 	overrideUpdateFn = fn;
+	__overrideUpdate = overrideUpdate;
+}
+
+void setResizeFunction(ResizeFn fn) {
+
+	resizeFn = fn;
 }
 
 #pragma endregion
@@ -259,9 +281,22 @@ GameObject2D* addObject(const char* name, GameObject2D* newObject) {
 
 		// If object created successfully setup string for new object 'key'
 		string keyString;
+		string collectionName = string(""); // existing collection name if present
 
 		// Find out if object exists and set name key
-		auto objectCountIter = objectCount.find(name);
+		auto objectCountIter = objectCount.begin();
+		while (objectCountIter != objectCount.end()) {
+
+			if (string(name).find(objectCountIter->first) != std::string::npos) {
+
+				collectionName = objectCountIter->first;
+				break;
+			}
+			else {
+
+				objectCountIter++;
+			}
+		}
 
 		if (objectCountIter == objectCount.end()) {
 
@@ -274,6 +309,8 @@ GameObject2D* addObject(const char* name, GameObject2D* newObject) {
 			// name does exist so increase count
 			objectCount[name] = objectCount[name] + 1; // pre-increment count against 'name'
 			keyString = string(name) + to_string(objectCount[name]);
+			objectCount[collectionName] = objectCount[collectionName] + 1; // pre-increment count against 'name'
+			keyString = string(name) + to_string(objectCount[collectionName]);
 		}
 
 		// If caller provided a GameObject2D* (e.g. Player, Enemy, Lives) try to determine whether its texture uses alpha.
@@ -462,6 +499,11 @@ void defaultResizeWindow(GLFWwindow* window, int width, int height)
 
 	viewplaneAspect = (float)windowHeight / (float)windowWidth;
 	viewplaneSize.y = viewplaneSize.x * viewplaneAspect;
+
+	if (resizeFn != nullptr) {
+
+		resizeFn(window, getViewplaneWidth(), getViewplaneHeight());
+	}
 }
 
 void defaultKeyboardHandler(GLFWwindow* window, int key, int scancode, int action, int mods)
@@ -514,33 +556,168 @@ void listGameObjectKeys() {
 
 // Restore these engine utility functions so other objects link correctly.
 
+
+// Delete the game object with key 'key' and return true if successful, false otherwise.  This matches key *exactly*, it does not do a partial match
+bool deleteObject(const char* key) {
+
+	auto iter = gameObjects.find(key);
+
+	if (iter != gameObjects.end()) {
+
+		// Object to delete found - first store key string
+		string objKey = iter->first;
+
+		// ...the delete from gameObjects.
+		gameObjects.erase(iter);
+
+		// Now we need to string-match objKey to the objectCount array.
+		// objectCount keys are a substring of gameObject keys that have numbers appended to differentiate.
+		// When found we decrememt the count.  If it reaches zero erase the key from the count array
+		for (auto countIter = objectCount.begin(); countIter != objectCount.end(); countIter++) {
+
+			if (objKey.find(countIter->first) != std::string::npos) {
+
+				countIter->second = countIter->second - 1; // decrement count
+
+				if (countIter->second == 0) {
+
+					objectCount.erase(countIter);
+				}
+
+				break;
+			}
+		}
+
+		return true;
+	}
+	else {
+
+		return false;
+	}
+}
+
+// Delete the game object pointed to by objectPtr and return true if successful, false otherwise.  It is assumed 1 instance if each objectPtr exists in the object list maintained by the engine.  If this is not the case then the first instance of the pointer only is deleted.
+bool deleteObject(GameObject2D* objectPtr) {
+
+	bool objectErased = false;
+
+	for (auto iter = gameObjects.begin(); iter != gameObjects.end(); iter++) {
+
+		if (iter->second == objectPtr) {
+
+			// Object to delete found - first store key string
+			string objKey = iter->first;
+
+			// ...the delete from gameObjects.
+			gameObjects.erase(iter);
+			objectErased = true;
+
+			// Now we need to string-match objKey to the objectCount array.
+			// objectCount keys are a substring of gameObject keys that have numbers appended to differentiate.
+			// When found we decrememt the count.  If it reaches zero erase the key from the count array
+			for (auto countIter = objectCount.begin(); countIter != objectCount.end(); countIter++) {
+
+				if (objKey.find(countIter->first) != std::string::npos) {
+
+					countIter->second = countIter->second - 1; // decrement count
+
+					if (countIter->second == 0) {
+
+						objectCount.erase(countIter);
+					}
+
+					break;
+				}
+			}
+
+			break;
+		}
+	}
+
+	return objectErased;
+}
+
+// Delete any object where the key partially matches 'key'.  Unlike deleteObject, this can be used to remove groups of like-named objects.  The function returns 0 if no objects matched and nothing was deleted, otherwise it returns the number of elements removed.
+int deleteMatchingObjects(const char* key) {
+
+	int eraseCount = 0;
+
+	for (auto iter = gameObjects.begin(); iter != gameObjects.end();) {
+
+		if (iter->first.find(key) != std::string::npos) {
+
+			// Object to delete found - first store key string
+			string objKey = iter->first;
+
+			// ...the delete from gameObjects.
+			iter = gameObjects.erase(iter);
+			eraseCount++;
+
+			// Now we need to string-match objKey to the objectCount array.
+			// objectCount keys are a substring of gameObject keys that have numbers appended to differentiate.
+			// When found we decrememt the count.  If it reaches zero erase the key from the count array
+			for (auto countIter = objectCount.begin(); countIter != objectCount.end(); countIter++) {
+
+				if (objKey.find(countIter->first) != std::string::npos) {
+
+					countIter->second = countIter->second - 1; // decrement count
+
+					if (countIter->second == 0) {
+
+						objectCount.erase(countIter);
+					}
+
+					break;
+				}
+			}
+		}
+		else {
+
+			iter++;
+		}
+	}
+
+	return eraseCount;
+}
+
+
 void showAxisLines() {
+
 	_showAxisLines = true;
 }
 
 void hideAxisLines() {
+
 	_showAxisLines = false;
 }
 
 bool axisLinesVisible() {
+
 	return _showAxisLines;
 }
 
-void setBackgroundColour(glm::vec4& newColour) {
-	backgroundColour = newColour;
-}
 
 void setViewplaneWidth(float newWidth) {
+
 	viewplaneSize.x = newWidth;
 	viewplaneSize.y = viewplaneSize.x * viewplaneAspect;
 }
 
 float getViewplaneWidth() {
+
 	return viewplaneSize.x;
 }
 
 float getViewplaneHeight() {
+
 	return viewplaneSize.y;
 }
+
+int getObjectCounts(string key) {
+
+	return objectCount[key];
+}
+
+#pragma endregion
 
 

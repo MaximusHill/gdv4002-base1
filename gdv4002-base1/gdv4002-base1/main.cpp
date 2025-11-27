@@ -8,6 +8,7 @@
 #include <random>
 #include "Background.h"
 #include "Lives.h"
+#include "glPrint.h"
 extern Player* player;
 // Function prototypes
 void myUpdate(GLFWwindow* window, double tDelta);
@@ -21,6 +22,7 @@ float randomRotation();
 GLuint randomEnemyTexture();
 
 int main(void) {
+	
 	hideAxisLines();
 	
 	float playerVelocity = 2.0f;

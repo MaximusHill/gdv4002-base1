@@ -1,6 +1,6 @@
 #pragma once
 
-// Engine.h ver 1.1
+// Engine.h ver 1.2
 
 #include "GraphicsCore.h"
 
@@ -22,6 +22,7 @@
 // Define function pointers for render and update functions
 typedef void (*RenderFn)(GLFWwindow* window);
 typedef void (*UpdateFn)(GLFWwindow* window, double tDelta);
+typedef void (*ResizeFn)(GLFWwindow* window, float viewplaneWidth, float viewplaneHeight);
 
 
 // Define new type to store collections of game objects
@@ -82,8 +83,8 @@ void engineShutdown();
 //
 void setKeyboardHandler(GLFWkeyfun newKeyboardHandler);
 void setRenderFunction(RenderFn fn);
-void setUpdateFunction(UpdateFn fn);
-
+void setUpdateFunction(UpdateFn fn, bool overrideUpdate = true);
+void setResizeFunction(ResizeFn fn);
 //
 // Update / Query engine state
 //
@@ -120,12 +121,15 @@ int deleteMatchingObjects(const char* key);
 void showAxisLines();
 void hideAxisLines();
 bool axisLinesVisible();
-void setBackgroundColour(glm::vec4& newColour);
+
 void setViewplaneWidth(float newWidth);
 float getViewplaneWidth();
 float getViewplaneHeight();
 
+glm::vec4 getBackgroundColour();
+void setBackgroundColour(glm::vec4 newColour);
 
+int getObjectCounts(std::string key);
 //
 // Test functions
 //
