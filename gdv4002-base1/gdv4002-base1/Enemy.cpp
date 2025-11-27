@@ -44,6 +44,10 @@ void Enemy::update(double tDelta) {
 		position.x -= getViewplaneWidth();
 	}
 	orientation += randomRotationSpeed * tDelta;
+	float top = position.y + (size.y / 2.0f);
+	float bottom = position.y - (size.y / 2.0f);
+	float left = position.x - (size.x / 2.0f);
+	float right = position.x + (size.x / 2.0f);
 }
 std::mt19937& getRandomEngine2() {
 	static std::random_device rd;

@@ -100,6 +100,7 @@ int main(void) {
 	addObject("enemy3", enemy3);
 	
 
+
 	setUpdateFunction(myUpdate);
 
 	

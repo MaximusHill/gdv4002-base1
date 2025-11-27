@@ -65,7 +65,10 @@ void Player::update(double tDelta) {
 	velocity = velocity + (a * (float)tDelta);
 	position = position + (velocity * (float)tDelta);
 
+	
 
+	
+	
 
 }
 

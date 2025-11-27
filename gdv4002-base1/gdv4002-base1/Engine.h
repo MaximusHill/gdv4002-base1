@@ -127,7 +127,7 @@ float getViewplaneWidth();
 float getViewplaneHeight();
 
 glm::vec4 getBackgroundColour();
-void setBackgroundColour(glm::vec4 newColour);
+void setBackgroundColour(glm::vec4& newColour);
 
 int getObjectCounts(std::string key);
 //
