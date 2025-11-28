@@ -32,6 +32,9 @@ static glm::vec4 backgroundColour(0.0f, 0.0f, 0.0f, 1.0f);
 static RenderFn overrideRenderFn = nullptr;
 static UpdateFn overrideUpdateFn = nullptr;
 
+// Add missing static for resize override
+static ResizeFn overrideResizeFn = nullptr;
+
 #pragma endregion
 
 
@@ -179,6 +182,11 @@ void setUpdateFunction(UpdateFn fn, bool overrideUpdate) {
 	overrideUpdateFn = fn;
 }
 
+// Allow external code to set a resize callback (optional)
+void setResizeFunction(ResizeFn fn) {
+    overrideResizeFn = fn;
+}
+
 #pragma endregion
 
 
@@ -322,6 +330,55 @@ GameObject2D* getObject(const char* key) {
 }
 
 
+// Wrapper so external code can call the internal default renderer
+void renderDefaultScene(GLFWwindow* window) {
+    // ignore parameter and call internal default renderer
+    defaultRenderScene();
+}
+
+// BackgroundColour accessors
+glm::vec4 getBackgroundColour() {
+    return backgroundColour;
+}
+
+void setBackgroundColour(glm::vec4& newColour) {
+    backgroundColour = newColour;
+}
+
+// Axis lines control
+void showAxisLines() {
+    _showAxisLines = true;
+}
+
+void hideAxisLines() {
+    _showAxisLines = false;
+}
+
+bool axisLinesVisible() {
+    return _showAxisLines;
+}
+
+// Viewplane helpers
+void setViewplaneWidth(float newWidth) {
+    viewplaneSize.x = newWidth;
+    viewplaneSize.y = viewplaneSize.x * viewplaneAspect;
+}
+
+float getViewplaneWidth() {
+    return viewplaneSize.x;
+}
+
+float getViewplaneHeight() {
+    return viewplaneSize.y;
+}
+
+// Return the number of registered objects for the given key (or 0 if absent)
+int getObjectCounts(std::string key) {
+    auto it = objectCount.find(key);
+    if (it == objectCount.end()) return 0;
+    return it->second;
+}
+
 // Return a collection of object where part of the object's key matches the 'key' parameter.  Value semantics is applied so when the caller eventually goes out of scope the collection's destructor will automatically free the internally allocated memory for the collection.
 GameObjectCollection getObjectCollection(const char* key) {
 
@@ -443,6 +500,82 @@ void defaultRenderScene()
 	}
 }
 
+// Single rendering helper used by game code: render all objects (opaque then transparent)
+void renderObjects() {
+    std::vector<GameObject2D*> opaqueList;
+    std::vector<GameObject2D*> transparentList;
+
+    for (auto& kv : gameObjects) {
+        GameObject2D* obj = kv.second;
+        if (!obj) continue;
+
+        if (obj->usesAlpha) transparentList.push_back(obj);
+        else opaqueList.push_back(obj);
+    }
+
+    // Opaque
+    glDisable(GL_BLEND);
+    glEnable(GL_DEPTH_TEST);
+    glDepthMask(GL_TRUE);
+    for (auto obj : opaqueList) if (obj) obj->render();
+
+    // Transparent (sorted far->near)
+    std::sort(transparentList.begin(), transparentList.end(), [](GameObject2D* a, GameObject2D* b) {
+        float za = a ? a->position.z : 0.0f;
+        float zb = b ? b->position.z : 0.0f;
+        return za > zb;
+    });
+
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glDepthMask(GL_FALSE);
+    glEnable(GL_DEPTH_TEST);
+    for (auto obj : transparentList) if (obj) obj->render();
+
+    // restore
+    glDepthMask(GL_TRUE);
+    glDisable(GL_BLEND);
+}
+
+// Render only objects whose key contains "background"
+void renderBackgroundObjects() {
+    std::vector<GameObject2D*> opaqueList;
+    std::vector<GameObject2D*> transparentList;
+
+    for (auto& kv : gameObjects) {
+        const std::string& key = kv.first;
+        if (key.find("background") == std::string::npos) continue;
+        GameObject2D* obj = kv.second;
+        if (!obj) continue;
+
+        if (obj->usesAlpha) transparentList.push_back(obj);
+        else opaqueList.push_back(obj);
+    }
+
+    // Opaque background
+    glDisable(GL_BLEND);
+    glEnable(GL_DEPTH_TEST);
+    glDepthMask(GL_TRUE);
+    for (auto obj : opaqueList) if (obj) obj->render();
+
+    // Transparent background
+    std::sort(transparentList.begin(), transparentList.end(), [](GameObject2D* a, GameObject2D* b) {
+        float za = a ? a->position.z : 0.0f;
+        float zb = b ? b->position.z : 0.0f;
+        return za > zb;
+    });
+
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glDepthMask(GL_FALSE);
+    glEnable(GL_DEPTH_TEST);
+    for (auto obj : transparentList) if (obj) obj->render();
+
+    // restore
+    glDepthMask(GL_TRUE);
+    glDisable(GL_BLEND);
+}
+
 // Function called to update game objects in the scene
 void defaultUpdateScene(double tDelta) {
 
@@ -452,16 +585,20 @@ void defaultUpdateScene(double tDelta) {
 	}
 }
 
-// Function to call when window resized
 void defaultResizeWindow(GLFWwindow* window, int width, int height)
 {
-	glViewport(0, 0, width, height);		// Draw into entire window
+	glViewport(0, 0, width, height); 		// Draw into entire window
 
 	windowWidth = width;
 	windowHeight = height;
 
 	viewplaneAspect = (float)windowHeight / (float)windowWidth;
 	viewplaneSize.y = viewplaneSize.x * viewplaneAspect;
+
+    if (overrideResizeFn) {
+        // notify external resize function with updated viewplane dimensions
+        overrideResizeFn(window, viewplaneSize.x, viewplaneSize.y);
+    }
 }
 
 void defaultKeyboardHandler(GLFWwindow* window, int key, int scancode, int action, int mods)
@@ -485,64 +622,7 @@ void defaultKeyboardHandler(GLFWwindow* window, int key, int scancode, int actio
 	}
 }
 
-#pragma endregion
-
-
-#pragma region Test functions
-
-void listObjectCounts() {
-
-	printf("\nObject key counts...\n");
-	for (auto iter = objectCount.begin(); iter != objectCount.end(); iter++) {
-
-		printf("%s has count %d\n", iter->first.c_str(), iter->second);
-	}
-	printf("\n");
-}
-
-void listGameObjectKeys() {
-
-	printf("\nIn-Game object keys...\n");
-	for (auto iter = gameObjects.begin(); iter != gameObjects.end(); iter++) {
-
-		printf("%s\n", iter->first.c_str());
-	}
-	printf("\n");
-}
-
-#pragma endregion
-
-// Restore these engine utility functions so other objects link correctly.
-
-void showAxisLines() {
-	_showAxisLines = true;
-}
-
-void hideAxisLines() {
-	_showAxisLines = false;
-}
-
-bool axisLinesVisible() {
-	return _showAxisLines;
-}
-
-void setBackgroundColour(glm::vec4& newColour) {
-	backgroundColour = newColour;
-}
-
-void setViewplaneWidth(float newWidth) {
-	viewplaneSize.x = newWidth;
-	viewplaneSize.y = viewplaneSize.x * viewplaneAspect;
-}
-
-float getViewplaneWidth() {
-	return viewplaneSize.x;
-}
-
-float getViewplaneHeight() {
-	return viewplaneSize.y;
-}
-
+// Delete the game object with key 'key' and return true if successful, false otherwise.  This matches key *exactly*, it does not do a partial match
 bool deleteObject(const char* key) {
 
 	auto iter = gameObjects.find(key);
@@ -594,7 +674,7 @@ bool deleteObject(GameObject2D* objectPtr) {
 			string objKey = iter->first;
 
 			// ...the delete from gameObjects.
-			gameObjects.erase(iter);
+			iter = gameObjects.erase(iter);
 			objectErased = true;
 
 			// Now we need to string-match objKey to the objectCount array.
@@ -665,7 +745,6 @@ int deleteMatchingObjects(const char* key) {
 	return eraseCount;
 }
 
-
 AABB2 computeAABB(GameObject2D* obj) {
 
 	AABB2 box;
@@ -678,13 +757,12 @@ AABB2 computeAABB(GameObject2D* obj) {
 	glm::vec2 pos2 = glm::vec2(obj->position.x, obj->position.y);
 	glm::vec2 half = glm::vec2(0.0f, 0.0f);
 
-	
-#ifdef GAMEOBJECT_HAS_SIZE
+	#ifdef GAMEOBJECT_HAS_SIZE
 	half = obj->size * 0.5f;
-#else
+	#else
 
 	half = obj->size * 0.5f;
-#endif
+	#endif
 
 	box.min = pos2 - half;
 	box.max = pos2 + half;
@@ -731,7 +809,7 @@ int checkCollisionsBetweenGroups(const char* groupA, const char* groupB, bool pr
 			if (GameObjectAABBCollision(a, b)) {
 				collisions++;
 				if (printPairs) {
-		
+			
 					printf("[Collision] %s (addr=%p) <-> %s (addr=%p)\n", groupA, (void*)a, groupB, (void*)b);
 				}
 
@@ -770,6 +848,9 @@ int checkCollisionsWithinGroup(const char* groupKey, bool printPairs) {
 
 	return collisions;
 }
+
+
+
 
 
 

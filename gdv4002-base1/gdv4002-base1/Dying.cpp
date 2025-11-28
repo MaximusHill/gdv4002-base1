@@ -94,7 +94,6 @@ void Dying::update(double tDelta) {
 
 void Dying::start() {
 	active = true;
-	// decide rotate direction based on textureID: compare to loaded textures
 	GLuint leftTex = loadTexture("Resources\\Textures\\Dyingleft.png");
 	GLuint rightTex = loadTexture("Resources\\Textures\\DyingRight.png");
 	if (textureID == leftTex) rotateSign = 1.0f;

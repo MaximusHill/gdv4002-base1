@@ -156,3 +156,11 @@ int checkCollisionsBetweenGroups(const char* groupA, const char* groupB, bool pr
 
 int checkCollisionsWithinGroup(const char* groupKey, bool printPairs = true);
 
+
+// Add to the Render / Update section
+void renderDefaultScene(GLFWwindow* window);
+
+// Allow external code to render the engine's default objects (without calling override)
+void renderObjects();
+void renderBackgroundObjects();
+

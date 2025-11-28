@@ -3,7 +3,7 @@
 #include <glm/glm.hpp>
 #include "GameObject2D.h"
 class Background : public GameObject2D {
-
+	
 private:
 	
 public:

@@ -38,10 +38,9 @@ bool CheckAABBCollision2(GameObject2D* a, GameObject2D* b) {
 }
 
 void Enemy::update(double tDelta) {
-    float dt = static_cast<float>(tDelta);
-
+    
     // Apply gravity to this enemy's velocity
-    velocity += gravity * dt;
+    velocity += gravity * float(tDelta);
 
     // Collision with player — only affects this enemy
     if (player && CheckAABBCollision2(player, this)) {
@@ -51,14 +50,14 @@ void Enemy::update(double tDelta) {
 
         velocity += glm::vec3(dir.x, dir.y, 0.0f) * knockbackForce; // only this enemy
         player->velocity += glm::vec3(-dir.x, -dir.y, 0.0f) * 0.5f;
-        
+		rotationSpeed += 1.5f;
     }
 
     // Update position using this enemy's velocity
-    position += velocity * dt;
+    position += velocity * float(tDelta);
 
     // Apply friction/decay so knockback slows down
-    velocity -= velocity * knockbackDecay * dt;
+    velocity -= velocity * knockbackDecay * float(tDelta);
 
     // Wrap around viewplane
     float halfWidth = getViewplaneWidth() / 2.0f;
@@ -70,5 +69,5 @@ void Enemy::update(double tDelta) {
     if (position.x > halfWidth) position.x -= getViewplaneWidth();
 
     // Rotate enemy
-    orientation += rotationSpeed * dt;
+    orientation += rotationSpeed * float(tDelta);
 }

@@ -151,11 +151,13 @@ copy "$(SolutionDir)Libs\FreeImage\Wrapper\FreeImagePlus\dist\x64\FreeImagePlus.
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Background.h" />
+    <ClInclude Include="Button.h" />
     <ClInclude Include="Deaths.h" />
     <ClInclude Include="Dying.h" />
     <ClInclude Include="Enemy.h" />
     <ClInclude Include="Engine.h" />
     <ClInclude Include="GameObject2D.h" />
+    <ClInclude Include="GameState.h" />
     <ClInclude Include="glPrint.h" />
     <ClInclude Include="GraphicsCore.h" />
     <ClInclude Include="GUClock.h" />

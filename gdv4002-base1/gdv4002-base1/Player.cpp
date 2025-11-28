@@ -7,10 +7,16 @@
 #include "Enemy.h"
 #include <vector>
 #include "Lives.h"
+#include "GameState.h"
 Player* player;
 std::bitset<5> keys{ 0x0 };
 
 extern std::vector<Enemy*> enemies;
+
+// forward declare GameState from main.cpp and resetGame
+enum class GameState;
+extern GameState currentGameState;
+
 
 
 bool CheckAABBCollision(GameObject2D* a, GameObject2D* b) {
@@ -63,21 +69,25 @@ void Player::update(double tDelta) {
     if (position.x > getViewplaneWidth() / 2.0f) {
         position.x -= getViewplaneWidth();
     }
-    if (keys.test(Key::W)) {
-        F += glm::vec3(0.0f, thrust, 0.0f);
-        orientation = 1.6f;
-    }
-    if (keys.test(Key::S)) {
-        F += glm::vec3(0.0f, -thrust, 0.0f);
-        orientation = -1.6f;
-    }
-    if (keys.test(Key::A)) {
-        F += glm::vec3(-thrust, 0.0f, 0.0f);
-        orientation += glm::radians(45.0f) * (float)tDelta;
-    }
-    if (keys.test(Key::D)) {
-        F += glm::vec3(thrust, 0.0f, 0.0f);
-        orientation -= glm::radians(45.0f) * (float)tDelta;
+
+    // Only apply movement forces when game is playing
+    if (currentGameState == GameState::PLAYING) {
+        if (keys.test(Key::W)) {
+            F += glm::vec3(0.0f, thrust, 0.0f);
+            orientation = 1.6f;
+        }
+        if (keys.test(Key::S)) {
+            F += glm::vec3(0.0f, -thrust, 0.0f);
+            orientation = -1.6f;
+        }
+        if (keys.test(Key::A)) {
+            F += glm::vec3(-thrust, 0.0f, 0.0f);
+            orientation += glm::radians(45.0f) * (float)tDelta;
+        }
+        if (keys.test(Key::D)) {
+            F += glm::vec3(thrust, 0.0f, 0.0f);
+            orientation -= glm::radians(45.0f) * (float)tDelta;
+        }
     }
 
     glm::vec3 a = F * (1.0f / mass);
@@ -105,13 +115,29 @@ void Player::update(double tDelta) {
 
 void myKeyboardHandler(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
+    // Handle global keys regardless of state
     if (action == GLFW_PRESS) {
         switch (key)
         {
         case GLFW_KEY_ESCAPE:
             glfwSetWindowShouldClose(window, true);
-            break;
+            return;
+        case GLFW_KEY_R:
+            // restart from game over
+            if (currentGameState == GameState::GAME_OVER) {
+                exit(0);
+                
+            }
+            return;
+        }
+    }
 
+    // Movement keys only meaningful during PLAYING
+    if (currentGameState != GameState::PLAYING) return;
+
+    if (action == GLFW_PRESS) {
+        switch (key)
+        {
         case GLFW_KEY_W:    
             keys[Key::W] = true; break;
         case GLFW_KEY_S:     
