@@ -74,10 +74,10 @@ int main(void) {
     float vw = getViewplaneWidth();
     float vh = getViewplaneHeight();
 
-    GLuint Playbtn = loadTexture("Resources\\Textures\\Play_Button.png");
-    GLuint Exitbtn = loadTexture("Resources\\Textures\\Exit_Button.png");
-    playButton = new Button(glm::vec3(0.0f, 0.0f, 0.0f), 0.0f, glm::vec2(2.5f, 1.0f), Playbtn, ButtonAction::PLAY);
-    exitButton = new Button(glm::vec3(0.0f, -1.5f, 0.0f), 0.0f, glm::vec2(2.5f, 1.0f), Exitbtn, ButtonAction::EXIT);
+    GLuint Playbtn = loadTexture("Resources\\Textures\\Play_Button2.png");
+    GLuint Exitbtn = loadTexture("Resources\\Textures\\Exit_Button2.png");
+    playButton = new Button(glm::vec3(0.0f, 0.0f, 0.0f), 0.0f, glm::vec2(3.5f, 1.0f), Playbtn, ButtonAction::PLAY);
+    exitButton = new Button(glm::vec3(0.0f, -1.5f, 0.0f), 0.0f, glm::vec2(3.5f, 1.0f), Exitbtn, ButtonAction::EXIT);
     addObject("menuPlay", playButton);
     addObject("menuExit", exitButton);
 
@@ -387,7 +387,7 @@ void myRender(GLFWwindow* window) {
 		player->velocity = glm::vec3(2.0f, -1.0f, 0.0f);
 		glBuildFontFromFile(L"Resources\\Font\\Skytone.otf", L"Skytone", 64);
         renderBackgroundObjects();
-        glRasterPos2f(-1.8f, 3.0f);
+        glRasterPos2f(-getViewplaneWidth()/5.5f, -getViewplaneHeight() / -5.5f);
         glPrint("Asteroids");
 
         // render buttons
