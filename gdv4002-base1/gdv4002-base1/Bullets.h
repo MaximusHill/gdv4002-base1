@@ -6,9 +6,11 @@ class Bullets : public GameObject2D {
 private:
     float mass;
     glm::vec3 velocity;
-    float angleChangePerSecond;
+    bool hitRegistered = false;
 
 public:
-   Bullets(glm::vec3 initPosition, float initOrientation, glm::vec2 initSize, GLuint initTextureID, float mass, float angleChangePerSecond);
+   Bullets(glm::vec3 initPosition, float initOrientation, glm::vec2 initSize, GLuint initTextureID, float mass);
     void update(double tDelta) override;
+
+    static int points;
 };

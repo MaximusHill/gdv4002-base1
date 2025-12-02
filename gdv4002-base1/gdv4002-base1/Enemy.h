@@ -11,10 +11,17 @@ public:
 
     void update(double tDelta);
 
-    glm::vec3 velocity;           // each enemy has its own velocity
+    glm::vec3 velocity;
     float rotationSpeed;
-    float knockbackDecay = 5.0f;  // how fast knockback slows down
-
+	float knockbackDecay = 1.0f;
+    bool alive = true;
+    static float randomPositionX2();
+    static float randomPositionY2();
+    static float randomRotation2();
+    static float randomSizeX2();
+    static float randomSizeY2();
+    static GLuint randomEnemyTexture2();
+    void respawn();
     static std::vector<Enemy*> enemies;
 };
 

@@ -151,10 +151,11 @@ void engineShutdown() {
 	if (gameClock) {
 
 		gameClock->stop();
-		gameClock->reportTimingData();
+		//gameClock->reportTimingData();
 	}
 
 	glfwTerminate();
+	
 }
 
 #pragma endregion

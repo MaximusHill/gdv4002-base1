@@ -14,15 +14,17 @@
 #include "GameState.h"
 #include "Button.h"
 #include "Emitter.h"
+#include "Bullets.h"
 
 extern Player* player;
 std::vector<Enemy*> enemies;
+ std::vector<Bullets*> bullets;
 std::vector<Lives*> lives;
 void myRender(GLFWwindow* window);
 void myUpdate(GLFWwindow* window, double tDelta);
 void myKeyboardHandler(GLFWwindow* window, int key, int scancode, int action, int mods);
 void myMouseButtonHandler(GLFWwindow* window, int button, int action, int mods);
-glm::vec3 gravity = glm::vec3(0.0f, -10.3f,0.0f);
+glm::vec3 gravity = glm::vec3(0.0f, -0.3f,0.0f);
 float randomPositionX();
 float randomPositionY();
 float randomSizeX();
@@ -133,8 +135,7 @@ void initGameplayObjects() {
     Player* mainPlayer = new Player(glm::vec3(0.0f, 0.0f,0.5f), 0.0f, glm::vec2(0.5f, 0.5f), playerTexture, 0.5f);
     player = mainPlayer;
     addObject("player", mainPlayer);
-    Emitter* emitter = new Emitter(glm::vec3(0.0f, getViewplaneHeight() / 5.0f, 0.5f), glm::vec3(getViewplaneWidth() / 2.0f, 0.0f, 0.5f), 0.05f);
-    addObject("emitter", emitter);
+  
     GLuint AliveTexture = loadTexture("Resources\\Textures\\Alive.png");
 
     GLuint DeadTexture = loadTexture("Resources\\Textures\\Dead.png");
@@ -193,9 +194,16 @@ void initGameplayObjects() {
     enemies.push_back(enemy1);
     enemies.push_back(enemy2);
     enemies.push_back(enemy3);
+    
     addObject("enemy1", enemy1);
+	
+    
     addObject("enemy2", enemy2);
+    
+   
     addObject("enemy3", enemy3);
+    
+  
     
 }
 
@@ -271,15 +279,24 @@ void myUpdate(GLFWwindow* window, double tDelta) {
     GameObject2D* enemy3 = getObject("enemy3");
     if (enemy3) enemy3->update(tDelta);
 
-	GameObject2D* emitter = getObject("emitter");
-	if (emitter) emitter->update(tDelta);
-
+    for (int i = 0; i < bullets.size(); i++) {
+        if (bullets[i]) bullets[i]->update(tDelta);
+    }
+   
     bool life1a = (getObject("Life1") != nullptr);
     bool life2a = (getObject("Life2") != nullptr);
     bool life3a = (getObject("Life3") != nullptr);
 
     if (!life1a && !life2a && !life3a) {
         currentGameState = GameState::GAME_OVER;
+    }
+    for (Enemy* e : enemies) {
+        if (e) {
+            e->update(tDelta);
+            if (!e->alive) {
+                e->respawn();
+            }
+        }
     }
 
 }
@@ -414,9 +431,10 @@ void myRender(GLFWwindow* window) {
        
         glBuildFont();
         renderObjects();
-        int points = 0;
+        
+        
         char buf[64];
-        sprintf_s(buf, "%d", points);
+        sprintf_s(buf, "%d", Bullets::points);
         glRasterPos2f(0.0f, getViewplaneHeight()-5.5f);
         glPrint(buf);
         glDeleteFont();
@@ -425,11 +443,17 @@ void myRender(GLFWwindow* window) {
     else if (currentGameState == GameState::GAME_OVER)
     {
         player->velocity = glm::vec3(2.0f, -1.0f, 0.0f);
-        glBuildFontFromFile(L"Resources\\Font\\Another Danger Slanted - Demo.otf", L"Another Danger Slanted - Demo", 48);
+        glBuildFont();
         renderBackgroundObjects();
+        char buf[64];
+        sprintf_s(buf, "Score: %d", Bullets::points);
+        glRasterPos2f(-1.3f, 0.5f);
+        glPrint(buf);
+        glDeleteFont();
+        glBuildFontFromFile(L"Resources\\Font\\Another Danger Slanted - Demo.otf", L"Another Danger Slanted - Demo", 48);
         glRasterPos2f(-1.5f, 2.0f);
         glPrint("GAME OVER");
-        glRasterPos2f(-2.4f, -1.0f);
+        glRasterPos2f(-2.2f, -1.0f);
         glPrint("Press ESC to Exit");
         glDeleteFont();
     }
@@ -440,16 +464,16 @@ void myMouseButtonHandler(GLFWwindow* window, int button, int action, int mods) 
     if (button != GLFW_MOUSE_BUTTON_LEFT || action != GLFW_PRESS) return;
 
     // get cursor position in window pixels
-    double px, py;
-    glfwGetCursorPos(window, &px, &py);
+    double x, y;
+    glfwGetCursorPos(window, &x, &y);
 
     // convert to viewplane coordinates
     int ww, wh;
     glfwGetWindowSize(window, &ww, &wh);
 
-    float vx = (float)px / (float)ww * getViewplaneWidth() - getViewplaneWidth() / 2.0f;
+    float vx = (float)x / (float)ww * getViewplaneWidth() - getViewplaneWidth() / 2.0f;
     // note: GLFW y=0 is top of window, viewplane y=+ is up, so invert
-    float vy = (1.0f - (float)py / (float)wh) * getViewplaneHeight() - getViewplaneHeight() / 2.0f;
+    float vy = (1.0f - (float)y / (float)wh) * getViewplaneHeight() - getViewplaneHeight() / 2.0f;
 
     glm::vec2 clickPos(vx, vy);
 

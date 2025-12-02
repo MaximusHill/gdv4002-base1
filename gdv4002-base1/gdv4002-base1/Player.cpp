@@ -9,15 +9,16 @@
 #include "Lives.h"
 #include "GameState.h"
 #include "Emitter.h"
+#include "Bullets.h"
 Player* player;
 std::bitset<5> keys{ 0x0 };
 
 extern std::vector<Enemy*> enemies;
-
+extern std::vector<Bullets*> bullets;
 // forward declare GameState from main.cpp and resetGame
 enum class GameState;
 extern GameState currentGameState;
-
+bool canShoot = true;
 
 
 bool CheckAABBCollision(GameObject2D* a, GameObject2D* b) {
@@ -51,7 +52,8 @@ void Player::update(double tDelta) {
     }
     glm::vec3 F = glm::vec3(0.0f, 0.0f, 0.0f);
     const float thrust = 3.0f;
-
+    glm::vec3 offset = glm::vec3(cos(player->orientation), sin(player->orientation), 0.0f) * 0.2f;
+ 
     //bottom
     if (position.y < -getViewplaneHeight() / 2.0f) {
 
@@ -75,20 +77,42 @@ void Player::update(double tDelta) {
     if (currentGameState == GameState::PLAYING) {
         if (keys.test(Key::W)) {
             F += glm::vec3(0.0f, thrust, 0.0f);
-            orientation = 1.6f;
+            orientation = glm::radians(90.0f);  
+
         }
         if (keys.test(Key::S)) {
             F += glm::vec3(0.0f, -thrust, 0.0f);
-            orientation = -1.6f;
+            orientation = glm::radians(-90.0f);  
+
         }
         if (keys.test(Key::A)) {
             F += glm::vec3(-thrust, 0.0f, 0.0f);
-            orientation += glm::radians(45.0f) * (float)tDelta;
+            orientation = glm::radians(180.f);
         }
         if (keys.test(Key::D)) {
             F += glm::vec3(thrust, 0.0f, 0.0f);
-            orientation -= glm::radians(45.0f) * (float)tDelta;
+            orientation = glm::radians(360.0f);
         }
+        if (keys.test(Key::SPACE) && canShoot) {
+            GLuint bulletTexture = loadTexture("Resources/Textures/projectiles/projectile1.png");
+
+            Bullets* b = new Bullets(
+                player->position + offset,  // spawn in front
+                player->orientation,
+                glm::vec2(0.2f, 0.5f),
+                bulletTexture,
+                0.1f
+            );
+
+            addObject("bullet", b);
+            bullets.push_back(b);
+			
+			canShoot = false;
+        }
+        else if (!keys.test(Key::SPACE)) {
+            canShoot = true;  
+        }
+        
        
             
 		

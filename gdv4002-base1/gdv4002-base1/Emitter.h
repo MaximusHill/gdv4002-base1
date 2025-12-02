@@ -6,7 +6,7 @@ class Emitter : public GameObject2D {
 private:
     float emitTimeInterval, emitCounter;
     unsigned long long particleNumber;
-    GLuint bullets[8];
+    GLuint bullets[4];
     std::mt19937 gen;
     std::uniform_int_distribution<int> spriteDist;
     std::uniform_real_distribution<float> normDist, massDist, scaleDist;
