@@ -8,6 +8,7 @@
 #include <vector>
 #include "Lives.h"
 #include "GameState.h"
+#include "Emitter.h"
 Player* player;
 std::bitset<5> keys{ 0x0 };
 
@@ -88,6 +89,9 @@ void Player::update(double tDelta) {
             F += glm::vec3(thrust, 0.0f, 0.0f);
             orientation -= glm::radians(45.0f) * (float)tDelta;
         }
+       
+            
+		
     }
 
     glm::vec3 a = F * (1.0f / mass);

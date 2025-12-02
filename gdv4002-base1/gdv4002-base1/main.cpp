@@ -13,6 +13,7 @@
 #include "Dying.h"
 #include "GameState.h"
 #include "Button.h"
+#include "Emitter.h"
 
 extern Player* player;
 std::vector<Enemy*> enemies;
@@ -21,7 +22,7 @@ void myRender(GLFWwindow* window);
 void myUpdate(GLFWwindow* window, double tDelta);
 void myKeyboardHandler(GLFWwindow* window, int key, int scancode, int action, int mods);
 void myMouseButtonHandler(GLFWwindow* window, int button, int action, int mods);
-glm::vec3 gravity = glm::vec3(0.0f, -3.3f,0.0f);
+glm::vec3 gravity = glm::vec3(0.0f, -10.3f,0.0f);
 float randomPositionX();
 float randomPositionY();
 float randomSizeX();
@@ -132,16 +133,17 @@ void initGameplayObjects() {
     Player* mainPlayer = new Player(glm::vec3(0.0f, 0.0f,0.5f), 0.0f, glm::vec2(0.5f, 0.5f), playerTexture, 0.5f);
     player = mainPlayer;
     addObject("player", mainPlayer);
-
+    Emitter* emitter = new Emitter(glm::vec3(0.0f, getViewplaneHeight() / 5.0f, 0.5f), glm::vec3(getViewplaneWidth() / 2.0f, 0.0f, 0.5f), 0.05f);
+    addObject("emitter", emitter);
     GLuint AliveTexture = loadTexture("Resources\\Textures\\Alive.png");
 
     GLuint DeadTexture = loadTexture("Resources\\Textures\\Dead.png");
     
-    Lives* Life3 = new Lives(glm::vec3(getViewplaneWidth()-5.5f, getViewplaneHeight()- 5.5f, 0.0f), 0.0f, glm::vec2(0.5f, 0.5f), AliveTexture);
+    Lives* Life3 = new Lives(glm::vec3(getViewplaneWidth()-5.5f, getViewplaneHeight()- 5.5f, -0.4f), 0.0f, glm::vec2(0.5f, 0.5f), AliveTexture);
 
-    Lives* Life2 = new Lives(glm::vec3(getViewplaneWidth()-6.5f, getViewplaneHeight() - 5.5f, 0.0f), 0.0f, glm::vec2(0.5f, 0.5f), AliveTexture);
+    Lives* Life2 = new Lives(glm::vec3(getViewplaneWidth()-6.5f, getViewplaneHeight() - 5.5f, -0.4f), 0.0f, glm::vec2(0.5f, 0.5f), AliveTexture);
 
-    Lives* Life1 = new Lives(glm::vec3(getViewplaneWidth()-7.5f, getViewplaneHeight() - 5.5f, 0.0f), 0.0f, glm::vec2(0.5f, 0.5f), AliveTexture);
+    Lives* Life1 = new Lives(glm::vec3(getViewplaneWidth()-7.5f, getViewplaneHeight() - 5.5f, -0.4f), 0.0f, glm::vec2(0.5f, 0.5f), AliveTexture);
 
     lives.push_back(Life1);
     lives.push_back(Life2);
@@ -150,21 +152,21 @@ void initGameplayObjects() {
     addObject("Life2", Life2);
     addObject("Life3", Life3); 
     
-    Dying* DyingLeft3 = new Dying(glm::vec3(getViewplaneWidth() - 5.5f, getViewplaneHeight() - 5.5f, 0.0f), 0.0f, glm::vec2(0.5f, 0.5f), loadTexture("Resources\\Textures\\Dyingleft.png"));
+    Dying* DyingLeft3 = new Dying(glm::vec3(getViewplaneWidth() - 5.5f, getViewplaneHeight() - 5.5f, -0.4f), 0.0f, glm::vec2(0.5f, 0.5f), loadTexture("Resources\\Textures\\Dyingleft.png"));
 
-    Dying* DyingLeft2 = new Dying(glm::vec3(getViewplaneWidth() - 6.5f, getViewplaneHeight() - 5.5f, 0.0f), 0.0f, glm::vec2(0.5f, 0.5f), loadTexture("Resources\\Textures\\Dyingleft.png"));
+    Dying* DyingLeft2 = new Dying(glm::vec3(getViewplaneWidth() - 6.5f, getViewplaneHeight() - 5.5f, -0.4f), 0.0f, glm::vec2(0.5f, 0.5f), loadTexture("Resources\\Textures\\Dyingleft.png"));
 
-    Dying* DyingLeft1 = new Dying(glm::vec3(getViewplaneWidth() - 7.5f, getViewplaneHeight() - 5.5f, 0.0f), 0.0f, glm::vec2(0.5f, 0.5f), loadTexture("Resources\\Textures\\Dyingleft.png"));
+    Dying* DyingLeft1 = new Dying(glm::vec3(getViewplaneWidth() - 7.5f, getViewplaneHeight() - 5.5f, -0.4f), 0.0f, glm::vec2(0.5f, 0.5f), loadTexture("Resources\\Textures\\Dyingleft.png"));
 
     addObject("DyingLeft1", DyingLeft1);
     addObject("DyingLeft2", DyingLeft2);
     addObject("DyingLeft3", DyingLeft3);
 
-    Dying* DyingRight3 = new Dying(glm::vec3(getViewplaneWidth() - 5.5f, getViewplaneHeight() - 5.5f, 0.0f), 0.0f, glm::vec2(0.5f, 0.5f), loadTexture("Resources\\Textures\\DyingRight.png"));
+    Dying* DyingRight3 = new Dying(glm::vec3(getViewplaneWidth() - 5.5f, getViewplaneHeight() - 5.5f, -0.4f), 0.0f, glm::vec2(0.5f, 0.5f), loadTexture("Resources\\Textures\\DyingRight.png"));
 
-    Dying* DyingRight2 = new Dying(glm::vec3(getViewplaneWidth() - 6.5f, getViewplaneHeight() - 5.5f, 0.0f), 0.0f, glm::vec2(0.5f, 0.5f), loadTexture("Resources\\Textures\\DyingRight.png"));
+    Dying* DyingRight2 = new Dying(glm::vec3(getViewplaneWidth() - 6.5f, getViewplaneHeight() - 5.5f, -0.4f), 0.0f, glm::vec2(0.5f, 0.5f), loadTexture("Resources\\Textures\\DyingRight.png"));
 
-    Dying* DyingRight1 = new Dying(glm::vec3(getViewplaneWidth() - 7.5f, getViewplaneHeight() - 5.5f, 0.0f), 0.0f, glm::vec2(0.5f, 0.5f), loadTexture("Resources\\Textures\\DyingRight.png"));
+    Dying* DyingRight1 = new Dying(glm::vec3(getViewplaneWidth() - 7.5f, getViewplaneHeight() - 5.5f, -0.4f), 0.0f, glm::vec2(0.5f, 0.5f), loadTexture("Resources\\Textures\\DyingRight.png"));
 
     addObject("DyingRight1", DyingRight1);
     addObject("DyingRight2", DyingRight2);
@@ -194,6 +196,7 @@ void initGameplayObjects() {
     addObject("enemy1", enemy1);
     addObject("enemy2", enemy2);
     addObject("enemy3", enemy3);
+    
 }
 
 
@@ -268,12 +271,14 @@ void myUpdate(GLFWwindow* window, double tDelta) {
     GameObject2D* enemy3 = getObject("enemy3");
     if (enemy3) enemy3->update(tDelta);
 
-    // Check for game over: if no life sprites remain then go to GAME_OVER
-    bool life1 = (getObject("Life1") != nullptr);
-    bool life2v = (getObject("Life2") != nullptr);
-    bool life3v = (getObject("Life3") != nullptr);
+	GameObject2D* emitter = getObject("emitter");
+	if (emitter) emitter->update(tDelta);
 
-    if (!life1 && !life2v && !life3v) {
+    bool life1a = (getObject("Life1") != nullptr);
+    bool life2a = (getObject("Life2") != nullptr);
+    bool life3a = (getObject("Life3") != nullptr);
+
+    if (!life1a && !life2a && !life3a) {
         currentGameState = GameState::GAME_OVER;
     }
 
