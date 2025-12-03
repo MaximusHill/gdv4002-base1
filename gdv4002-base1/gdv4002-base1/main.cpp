@@ -13,7 +13,6 @@
 #include "Dying.h"
 #include "GameState.h"
 #include "Button.h"
-#include "Emitter.h"
 #include "Bullets.h"
 
 extern Player* player;
@@ -130,7 +129,7 @@ void initBackgroundObjects() {
 void initGameplayObjects() {
 
    
-    GLuint playerTexture = loadTexture("Resources\\Textures\\player1_ship.png");
+    GLuint playerTexture = loadTexture("Resources\\Textures\\spaceship3.png");
     
     Player* mainPlayer = new Player(glm::vec3(0.0f, 0.0f,0.5f), 0.0f, glm::vec2(0.5f, 0.5f), playerTexture, 0.5f);
     player = mainPlayer;

@@ -8,7 +8,6 @@
 #include <vector>
 #include "Lives.h"
 #include "GameState.h"
-#include "Emitter.h"
 #include "Bullets.h"
 Player* player;
 std::bitset<5> keys{ 0x0 };
