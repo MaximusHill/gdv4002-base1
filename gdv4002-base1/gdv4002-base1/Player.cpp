@@ -119,10 +119,11 @@ void Player::update(double tDelta) {
                 boostCooldown -= static_cast<float>(tDelta);
                 if (boostCooldown < 0.0f) boostCooldown = 0.0f;
             }
+			player->textureID = loadTexture("Resources\\Textures\\spaceshipWithFire.png");
         }
         else if (!keys.test(Key::LSHIFT)&& boostCooldown<2.0f) {
             
-           
+            player->textureID = loadTexture("Resources\\Textures\\spaceship3.png");
             shiftunpressed = true;
             
         }
