@@ -63,6 +63,12 @@
     <ClCompile Include="Bullets.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Collision.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="RandomEngine.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine.h">
@@ -119,5 +125,13 @@
     <ClInclude Include="Bullets.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Collision.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="RandomEngine.h">
+      <Filter>Header Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

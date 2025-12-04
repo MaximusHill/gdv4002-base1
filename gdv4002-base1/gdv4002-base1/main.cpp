@@ -14,34 +14,36 @@
 #include "GameState.h"
 #include "Button.h"
 #include "Bullets.h"
+#include "RandomEngine.h"
 
+#pragma region Variables and stuff
+
+
+
+//all externals
 extern Player* player;
 std::vector<Enemy*> enemies;
- std::vector<Bullets*> bullets;
+std::vector<Bullets*> bullets;
 std::vector<Lives*> lives;
 void myRender(GLFWwindow* window);
 void myUpdate(GLFWwindow* window, double tDelta);
+//key and mouse handlers
 void myKeyboardHandler(GLFWwindow* window, int key, int scancode, int action, int mods);
 void myMouseButtonHandler(GLFWwindow* window, int button, int action, int mods);
 glm::vec3 gravity = glm::vec3(0.0f, -0.3f,0.0f);
-float randomPositionX();
-float randomPositionY();
-float randomSizeX();
-float randomSizeY();
-float randomRotation();
-GLuint randomEnemyTexture();
+
 
 // Game state
 GameState currentGameState = GameState::MAIN_MENU;
 
-// forward so Player.cpp keyboard handler can call this on restart
-
+// initialization functions
 void initGameplayObjects();
 void initBackgroundObjects();
 
 // menu buttons
 static Button* playButton = nullptr;
 static Button* exitButton = nullptr;
+#pragma endregion
 
 int main(void) {
     
@@ -59,17 +61,12 @@ int main(void) {
         return initResult;
     }
     
-
-    
-
-    // Create gameplay objects (player, lives, enemies)
     initGameplayObjects();
 
-    // Create background objects once (don't recreate each frame)
     initBackgroundObjects();
 
     setKeyboardHandler(myKeyboardHandler);
-    // set mouse handler
+  
     glfwSetMouseButtonCallback(glfwGetCurrentContext(), myMouseButtonHandler);
 
     // create menu buttons
@@ -83,7 +80,7 @@ int main(void) {
     addObject("menuPlay", playButton);
     addObject("menuExit", exitButton);
 
-    // enable custom render to draw UI text
+    
     setRenderFunction(myRender);
     setUpdateFunction(myUpdate);
     engineMainLoop();
@@ -93,6 +90,10 @@ int main(void) {
     
     return 0;
 }
+#pragma region initiation
+
+
+
 void initBackgroundObjects() {
     float backGroundHeight = getViewplaneHeight();
     float backGroundWidth = getViewplaneWidth();
@@ -205,7 +206,7 @@ void initGameplayObjects() {
   
     
 }
-
+#pragma endregion
 
 void myUpdate(GLFWwindow* window, double tDelta) {
     // Always update background elements so menu has motion
@@ -299,80 +300,6 @@ void myUpdate(GLFWwindow* window, double tDelta) {
     }
 
 }
-std::mt19937& getRandomEngine() {
-    static std::random_device rd;
-    static std::mt19937 engine(rd());
-    return engine;
-}
-float randomPositionX()
-{
-    float planeWidth = getViewplaneWidth();
-    float halfWidth = planeWidth / 2.0f;
-
-    std::uniform_real_distribution<float> distribution(-halfWidth, halfWidth);
-    
-    return distribution(getRandomEngine());
-}
-float randomPositionY()
-{
-    float planeHeight = getViewplaneHeight();
-    float halfHeight = planeHeight / 2.0f;
-
-    // Top 10% starts at 90% of the positive range so that the enemys spawn near the top
-    float startY = halfHeight * 0.90f;
-    float endY = halfHeight;
-
-    std::uniform_real_distribution<float> distribution(startY, endY);
-
-    return distribution(getRandomEngine());
-}
-float randomRotation()
-{
-    std::uniform_real_distribution<float> distribution(0.0f, 360.0f);
-
-    return distribution(getRandomEngine());
-}
-
-float randomSizeX()
-{
-    std::uniform_real_distribution<float> distribution(0.3, 1.5);
-
-    return distribution(getRandomEngine());
-}
-float randomSizeY()
-{
-    std::uniform_real_distribution<float> distribution(0.3, 1.5);
-
-    return distribution(getRandomEngine());
-}
-GLuint randomEnemyTexture()
-{
-    
-
-    std::uniform_int_distribution<int> distribution(0, 2);
-
-    float engine = distribution(getRandomEngine());
-
-    if (engine == 0)
-    {
-        return loadTexture("Resources\\Textures\\asteroid1.png");
-    }
-    else if (engine == 1)
-    {
-        return  loadTexture("Resources\\Textures\\asteroid2.png");
-    }
-    else if (engine == 2)
-    {
-         return loadTexture("Resources\\Textures\\asteroid3.png");
-    }
-    else
-    {
-        return 0;
-    }
-
-    
-}
-
 
 void myRender(GLFWwindow* window) {
 
@@ -410,8 +337,6 @@ void myRender(GLFWwindow* window) {
         renderBackgroundObjects();
         glRasterPos2f(-getViewplaneWidth()/5.5f, -getViewplaneHeight() / -5.5f);
         glPrint("Asteroids");
-
-        // render buttons
         if (playButton) playButton->render();
         if (exitButton) exitButton->render();
         glDeleteFont();
@@ -431,7 +356,7 @@ void myRender(GLFWwindow* window) {
         glBuildFont();
         renderObjects();
         
-        
+        glColor3f(1.0f, 0.0f, 0.0f);
         char buf[64];
         sprintf_s(buf, "%d", Bullets::points);
         glRasterPos2f(0.0f, getViewplaneHeight()-5.5f);
@@ -444,9 +369,11 @@ void myRender(GLFWwindow* window) {
         player->velocity = glm::vec3(2.0f, -1.0f, 0.0f);
         glBuildFont();
         renderBackgroundObjects();
+        glColor3f(1.0f, 0.0f, 0.0f);
         char buf[64];
         sprintf_s(buf, "Score: %d", Bullets::points);
-        glRasterPos2f(-1.3f, 0.5f);
+        glRasterPos2f(-1.7f, 0.5f);
+      
         glPrint(buf);
         glDeleteFont();
         glBuildFontFromFile(L"Resources\\Font\\Another Danger Slanted - Demo.otf", L"Another Danger Slanted - Demo", 48);

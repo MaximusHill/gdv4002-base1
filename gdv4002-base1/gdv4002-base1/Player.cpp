@@ -9,33 +9,22 @@
 #include "Lives.h"
 #include "GameState.h"
 #include "Bullets.h"
-Player* player;
-std::bitset<5> keys{ 0x0 };
+#include "Collision.h"
+#pragma region externals and variables
 
+
+
+Player* player;
+std::bitset<7> keys{ 0x0 };
 extern std::vector<Enemy*> enemies;
 extern std::vector<Bullets*> bullets;
-// forward declare GameState from main.cpp and resetGame
 enum class GameState;
 extern GameState currentGameState;
 bool canShoot = true;
 
+#pragma endregion
 
-bool CheckAABBCollision(GameObject2D* a, GameObject2D* b) {
-    float aLeft = a->position.x - a->size.x * 0.5f;
-    float aRight = a->position.x + a->size.x * 0.5f;
-    float aTop = a->position.y + a->size.y * 0.5f;
-    float aBottom = a->position.y - a->size.y * 0.5f;
 
-    float bLeft = b->position.x - b->size.x * 0.5f;
-    float bRight = b->position.x + b->size.x * 0.5f;
-    float bTop = b->position.y + b->size.y * 0.5f;
-    float bBottom = b->position.y - b->size.y * 0.5f;
-
-    return !(aLeft > bRight ||
-        aRight < bLeft ||
-        aTop < bBottom ||
-        aBottom > bTop);
-}
 
 Player::Player(glm::vec3 initPosition, float initOrientation, glm::vec2 initSize, GLuint initTextureID, float mass)
     : GameObject2D(initPosition, initOrientation, initSize, initTextureID) {
@@ -45,10 +34,7 @@ Player::Player(glm::vec3 initPosition, float initOrientation, glm::vec2 initSize
 }
 
 void Player::update(double tDelta) {
-    if (collisionCooldown > 0.0f) {
-        collisionCooldown -= static_cast<float>(tDelta);
-        if (collisionCooldown < 0.0f) collisionCooldown = 0.0f;
-    }
+    
     glm::vec3 F = glm::vec3(0.0f, 0.0f, 0.0f);
     const float thrust = 3.0f;
     glm::vec3 offset = glm::vec3(cos(player->orientation), sin(player->orientation), 0.0f) * 0.2f;
@@ -72,7 +58,9 @@ void Player::update(double tDelta) {
         position.x -= getViewplaneWidth();
     }
 
-    // Only apply movement forces when game is playing
+    #pragma region keyboardhandling
+
+
     if (currentGameState == GameState::PLAYING) {
         if (keys.test(Key::W)) {
             F += glm::vec3(0.0f, thrust, 0.0f);
@@ -111,16 +99,27 @@ void Player::update(double tDelta) {
         else if (!keys.test(Key::SPACE)) {
             canShoot = true;  
         }
+        if (keys.test(Key::Q)) {
+            orientation += glm::radians(180.0f) * (float)tDelta;
+        }
+        if (keys.test(Key::E)) {
+            orientation -= glm::radians(180.0f) * (float)tDelta;
+        }
         
        
             
 		
     }
+#pragma endregion
 
     glm::vec3 a = F * (1.0f / mass);
     velocity = velocity + (a * (float)tDelta);
     position = position + (velocity * (float)tDelta);
 
+    if (collisionCooldown > 0.0f) {
+        collisionCooldown -= static_cast<float>(tDelta);
+        if (collisionCooldown < 0.0f) collisionCooldown = 0.0f;
+    }
     for(Enemy * e : enemies) {
         if (!e) continue;
 
@@ -134,8 +133,8 @@ void Player::update(double tDelta) {
                 Lives::lives[0]->loseLife();
             }
 
-            // Reset cooldown to 0.5 seconds
-            collisionCooldown = 0.5f;
+            
+            collisionCooldown = 0.1f;
         }
     }
 }
@@ -149,15 +148,11 @@ void myKeyboardHandler(GLFWwindow* window, int key, int scancode, int action, in
         case GLFW_KEY_ESCAPE:
             glfwSetWindowShouldClose(window, true);
             return;
-        case GLFW_KEY_R:
-            // restart from game over
-            if (currentGameState == GameState::GAME_OVER) {
-                exit(0);
-                
-            }
-            return;
+
         }
+
     }
+
 
     // Movement keys only meaningful during PLAYING
     if (currentGameState != GameState::PLAYING) return;
@@ -175,6 +170,10 @@ void myKeyboardHandler(GLFWwindow* window, int key, int scancode, int action, in
             keys[Key::D] = true; break;
         case GLFW_KEY_SPACE: 
             keys[Key::SPACE] = true; break;
+        case GLFW_KEY_Q:
+			keys[Key::Q] = true; break;
+        case GLFW_KEY_E:
+            keys[Key::E] = true; break;
         }
     }
     else if (action == GLFW_RELEASE) {
@@ -190,6 +189,10 @@ void myKeyboardHandler(GLFWwindow* window, int key, int scancode, int action, in
             keys[Key::D] = false; break;
         case GLFW_KEY_SPACE:
             keys[Key::SPACE] = false; break;
+        case GLFW_KEY_Q:
+            keys[Key::Q] = false; break;
+        case GLFW_KEY_E:
+            keys[Key::E] = false; break;
         }
     }
 }

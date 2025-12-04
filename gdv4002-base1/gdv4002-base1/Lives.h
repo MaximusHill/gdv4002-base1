@@ -10,9 +10,9 @@ public:
     int getLives() const;
     static std::vector<Lives*> lives;
     int lifeCount = 3;
-    bool markedForDeath = false; // scheduled to play dying animation
-    bool dyingStarted = false;   // animation has been started
-    bool isAlive = true; // true while heart is visible
+    bool markedForDeath = false; 
+    bool dyingStarted = false;   
+    bool isAlive = true; 
 private:
    
 };

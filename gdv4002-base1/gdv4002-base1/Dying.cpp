@@ -7,7 +7,7 @@ Dying::Dying(glm::vec3 initPosition, float initOrientation, glm::vec2 initSize, 
 	: GameObject2D(initPosition, initOrientation, initSize, initTextureID) {
 	Texture = initTextureID;
 	active = false;
-	// determine rotate sign based on texture file couldn't be known here; default will be set in start()
+	
 }
 
 void Dying::render() {
@@ -17,7 +17,7 @@ void Dying::render() {
 	// Move to object's position
 	glTranslatef(position.x, position.y, position.z);
 
-	// Compute pivot in world units: bottom-center of the quad (half the object's height down)
+
 	float pivotY = -0.5f * size.y;
 	// Translate to pivot, rotate, then translate back so rotation occurs about the bottom center
 	glTranslatef(0.0f, pivotY, 0.0f);
@@ -34,7 +34,7 @@ void Dying::render() {
 
 	glBegin(GL_TRIANGLE_STRIP);
 
-	glColor3f(1.0f, 1.0f,0.0f);
+	glColor3f(1.0f, 1.0f, 0.0f);
 
 	glTexCoord2f(0.0f, 0.0f);
 	glVertex3f(-0.5f, -0.5f, 0.0f);
