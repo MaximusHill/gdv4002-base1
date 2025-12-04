@@ -30,6 +30,7 @@ void myUpdate(GLFWwindow* window, double tDelta);
 //key and mouse handlers
 void myKeyboardHandler(GLFWwindow* window, int key, int scancode, int action, int mods);
 void myMouseButtonHandler(GLFWwindow* window, int button, int action, int mods);
+void DrawBoostBar(float boostCooldown);
 glm::vec3 gravity = glm::vec3(0.0f, -0.3f,0.0f);
 
 
@@ -353,31 +354,29 @@ void myRender(GLFWwindow* window) {
     else if (currentGameState == GameState::PLAYING) {
         // show lives or simple HUD
        
-        glBuildFont(48);
+        glBuildFont(48,0);
         renderObjects();
         
         glColor3f(1.0f, 0.0f, 0.0f);
         char points[64];
         sprintf_s(points, "%d", Bullets::points);
-        glRasterPos2f(0.0f, getViewplaneHeight()-5.5f);
+        glRasterPos2f(0.0f, getViewplaneHeight() / 2.0f - 0.5f);
         glPrint(points);
         glDeleteFont();
-        glBuildFont(24);
-        char boostcooldown[32];
-        sprintf_s(boostcooldown, "Boost Cooldown: %.3f", player->boostCooldown);
-        glRasterPos2f(-5.0f, getViewplaneHeight() - 5.3f);
-        glPrint(boostcooldown);
-        char boostcooldown2[32];
-        sprintf_s(boostcooldown2, "Boost Cooldown2: %.3f", player->boostCooldown2);
-        glRasterPos2f(-5.0f, getViewplaneHeight() - 5.5f);
-        glPrint(boostcooldown2);
-        glDeleteFont();
+
+		float boostCooldown = player->boostCooldown;
+
+        
+		DrawBoostBar(boostCooldown);
+       
+   
+
 		
     }
     else if (currentGameState == GameState::GAME_OVER)
     {
         player->velocity = glm::vec3(2.0f, -1.0f, 0.0f);
-        glBuildFont(48);
+        glBuildFont(48,0);
         renderBackgroundObjects();
         glColor3f(1.0f, 0.0f, 0.0f);
         char points[64];
@@ -393,6 +392,31 @@ void myRender(GLFWwindow* window) {
         glDeleteFont();
     }
 
+}
+void DrawBoostBar(float boostCooldown)
+{
+  
+    int maxBars = 255;
+    float maxCooldown = 2.0f;
+
+   
+    int bars = static_cast<int>((boostCooldown / maxCooldown) * maxBars);
+
+    if (bars < 0) bars = 0;
+    if (bars > maxBars) bars = maxBars;
+
+   
+    char boost[256];
+    for (int i = 0; i < bars; i++)
+        boost[i] = '|';
+    boost[bars] = '\0';
+
+    
+	glBuildFont(36,1);
+    glColor3f(0.0f, 1.0f, 0.0f);
+    glRasterPos2f(-getViewplaneWidth() / 2.0f , getViewplaneHeight() / 2.0f-0.3f);
+    glPrint(boost);
+    glDeleteFont();
 }
 
 void myMouseButtonHandler(GLFWwindow* window, int button, int action, int mods) {

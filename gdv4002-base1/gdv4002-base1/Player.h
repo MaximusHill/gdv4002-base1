@@ -17,8 +17,8 @@ public:
 	void update(double tDelta) override;
 	glm::vec3 getVelocity() const { return velocity; }
 	float collisionCooldown = 0.0f;
-	float boostCooldown = 0.0f;
-	float boostCooldown2 = 2.0f;
-	bool boosted;
+	float boostCooldown = 2.0f;
+	
+	bool boosted = false;
 
 };

@@ -10,6 +10,8 @@
 #include "GameState.h"
 #include "Bullets.h"
 #include "Collision.h"
+#include "stdio.h"
+#include "glPrint.h"
 #pragma region externals and variables
 
 
@@ -21,14 +23,14 @@ extern std::vector<Bullets*> bullets;
 enum class GameState;
 extern GameState currentGameState;
 bool canShoot = true;
-
+bool shiftunpressed = false;
 #pragma endregion
 
 
 
 Player::Player(glm::vec3 initPosition, float initOrientation, glm::vec2 initSize, GLuint initTextureID, float mass)
     : GameObject2D(initPosition, initOrientation, initSize, initTextureID) {
-
+  
     this->mass = mass;
     velocity = glm::vec3(0.0f, 0.0f, 0.0f);
 }
@@ -107,31 +109,37 @@ void Player::update(double tDelta) {
         }
         
         
-        if (keys.test(Key::LSHIFT) && boostCooldown == 0.0f&&boostCooldown2>0.0f)
+        if (keys.test(Key::LSHIFT)&& boosted == false && shiftunpressed == false)
         {
 
             velocity += velocity * 1.1f * (float)tDelta;
-            boosted = true;
            
-
-        }
-        else if (!keys.test(Key::LSHIFT) && boosted == true) {
             
-
-            boostCooldown = 5.0f;
-            boostCooldown2 = 2.0f;
+            if (boostCooldown > 0.0f) {
+                boostCooldown -= static_cast<float>(tDelta);
+                if (boostCooldown < 0.0f) boostCooldown = 0.0f;
+            }
+        }
+        else if (!keys.test(Key::LSHIFT)&& boostCooldown<2.0f) {
+            
+           
+            shiftunpressed = true;
             
         }
-        if (boostCooldown > 0.0f) {
-            boostCooldown -= static_cast<float>(tDelta);
-            if (boostCooldown < 0.0f) boostCooldown = 0.0f; boosted = false;;
+        if(shiftunpressed == true)
+        {
+        
+            if (boostCooldown < 2.0f) {
+                boosted = true;
+                boostCooldown += static_cast<float>(tDelta)/2;
+                if (boostCooldown > 2.0f) {
+                    boostCooldown = 2.0f;
+                    boosted = false;
+                    shiftunpressed = false;
+                }
+            }
         }
-        if ((boostCooldown2 > 0.0f) && boosted == true) {
-            boostCooldown2 -= static_cast<float>(tDelta);
-            if (boostCooldown2 < 0.0f) boostCooldown2 = 0.0f;
-        }
-        printf("Cooldown1:%f\n", boostCooldown);
-        printf("Cooldown2:%f\n", boostCooldown2);
+    
             
 		
     }
@@ -225,3 +233,6 @@ void myKeyboardHandler(GLFWwindow* window, int key, int scancode, int action, in
         }
     }
 }
+
+
+
