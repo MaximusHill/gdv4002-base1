@@ -15,7 +15,7 @@
 
 
 Player* player;
-std::bitset<7> keys{ 0x0 };
+std::bitset<8> keys{ 0x0 };
 extern std::vector<Enemy*> enemies;
 extern std::vector<Bullets*> bullets;
 enum class GameState;
@@ -106,7 +106,32 @@ void Player::update(double tDelta) {
             orientation -= glm::radians(180.0f) * (float)tDelta;
         }
         
-       
+        
+        if (keys.test(Key::LSHIFT) && boostCooldown == 0.0f&&boostCooldown2>0.0f)
+        {
+
+            velocity += velocity * 1.1f * (float)tDelta;
+            boosted = true;
+           
+
+        }
+        else if (!keys.test(Key::LSHIFT) && boosted == true) {
+            
+
+            boostCooldown = 5.0f;
+            boostCooldown2 = 2.0f;
+            
+        }
+        if (boostCooldown > 0.0f) {
+            boostCooldown -= static_cast<float>(tDelta);
+            if (boostCooldown < 0.0f) boostCooldown = 0.0f; boosted = false;;
+        }
+        if ((boostCooldown2 > 0.0f) && boosted == true) {
+            boostCooldown2 -= static_cast<float>(tDelta);
+            if (boostCooldown2 < 0.0f) boostCooldown2 = 0.0f;
+        }
+        printf("Cooldown1:%f\n", boostCooldown);
+        printf("Cooldown2:%f\n", boostCooldown2);
             
 		
     }
@@ -174,6 +199,8 @@ void myKeyboardHandler(GLFWwindow* window, int key, int scancode, int action, in
 			keys[Key::Q] = true; break;
         case GLFW_KEY_E:
             keys[Key::E] = true; break;
+        case GLFW_KEY_LEFT_SHIFT:
+            keys[Key::LSHIFT] = true; break;
         }
     }
     else if (action == GLFW_RELEASE) {
@@ -193,6 +220,8 @@ void myKeyboardHandler(GLFWwindow* window, int key, int scancode, int action, in
             keys[Key::Q] = false; break;
         case GLFW_KEY_E:
             keys[Key::E] = false; break;
+        case GLFW_KEY_LEFT_SHIFT:
+            keys[Key::LSHIFT] = false; break;
         }
     }
 }

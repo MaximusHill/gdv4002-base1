@@ -14,7 +14,7 @@ static bool g_fontAdded = false;
 static std::wstring g_loadedFontPath;
 
 
-bool glBuildFont(void)
+bool glBuildFont(int pointSize)
 {
 	HFONT		font = NULL;
 	HDC			 hDC = NULL;
@@ -30,9 +30,10 @@ bool glBuildFont(void)
 		ReleaseDC(NULL, hDC);
 		return false;
 	}
-
+	int dpi = GetDeviceCaps(hDC, LOGPIXELSY);
+	int height = -MulDiv(pointSize > 0 ? pointSize : 12, dpi, 72);
 	// Create font
-	if (!(font = CreateFont(-48,                        // Height Of Font
+	if (!(font = CreateFont(-height,                        // Height Of Font
 		0,                            // Width Of Font
 		0,                            // Angle Of Escapement
 		0,                            // Orientation Angle

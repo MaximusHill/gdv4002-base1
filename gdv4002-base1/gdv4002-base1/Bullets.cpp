@@ -38,7 +38,7 @@ void Bullets::update(double tDelta) {
                 points += 100;
                 hitRegistered = true; 
 				e->alive = false;
-                break; // stop after first collision
+                break; 
             }
         }
     }

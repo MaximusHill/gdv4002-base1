@@ -353,28 +353,37 @@ void myRender(GLFWwindow* window) {
     else if (currentGameState == GameState::PLAYING) {
         // show lives or simple HUD
        
-        glBuildFont();
+        glBuildFont(48);
         renderObjects();
         
         glColor3f(1.0f, 0.0f, 0.0f);
-        char buf[64];
-        sprintf_s(buf, "%d", Bullets::points);
+        char points[64];
+        sprintf_s(points, "%d", Bullets::points);
         glRasterPos2f(0.0f, getViewplaneHeight()-5.5f);
-        glPrint(buf);
+        glPrint(points);
+        glDeleteFont();
+        glBuildFont(24);
+        char boostcooldown[32];
+        sprintf_s(boostcooldown, "Boost Cooldown: %.3f", player->boostCooldown);
+        glRasterPos2f(-5.0f, getViewplaneHeight() - 5.3f);
+        glPrint(boostcooldown);
+        char boostcooldown2[32];
+        sprintf_s(boostcooldown2, "Boost Cooldown2: %.3f", player->boostCooldown2);
+        glRasterPos2f(-5.0f, getViewplaneHeight() - 5.5f);
+        glPrint(boostcooldown2);
         glDeleteFont();
 		
     }
     else if (currentGameState == GameState::GAME_OVER)
     {
         player->velocity = glm::vec3(2.0f, -1.0f, 0.0f);
-        glBuildFont();
+        glBuildFont(48);
         renderBackgroundObjects();
         glColor3f(1.0f, 0.0f, 0.0f);
-        char buf[64];
-        sprintf_s(buf, "Score: %d", Bullets::points);
+        char points[64];
+        sprintf_s(points, "Score: %d", Bullets::points);
         glRasterPos2f(-1.7f, 0.5f);
-      
-        glPrint(buf);
+        glPrint(points);
         glDeleteFont();
         glBuildFontFromFile(L"Resources\\Font\\Another Danger Slanted - Demo.otf", L"Another Danger Slanted - Demo", 48);
         glRasterPos2f(-1.5f, 2.0f);
