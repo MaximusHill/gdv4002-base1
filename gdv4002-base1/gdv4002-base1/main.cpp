@@ -363,7 +363,7 @@ void myRender(GLFWwindow* window) {
         glRasterPos2f(0.0f, getViewplaneHeight() / 2.0f - 0.5f);
         glPrint(points);
         glDeleteFont();
-
+		
 		float boostCooldown = player->boostCooldown;
 
         

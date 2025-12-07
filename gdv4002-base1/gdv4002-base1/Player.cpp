@@ -12,6 +12,7 @@
 #include "Collision.h"
 #include "stdio.h"
 #include "glPrint.h"
+
 #pragma region externals and variables
 
 
@@ -23,7 +24,7 @@ extern std::vector<Bullets*> bullets;
 enum class GameState;
 extern GameState currentGameState;
 bool canShoot = true;
-bool shiftunpressed = false;
+float boostLockout = 0.0f;
 #pragma endregion
 
 
@@ -95,7 +96,9 @@ void Player::update(double tDelta) {
 
             addObject("bullet", b);
             bullets.push_back(b);
-			
+     
+
+
 			canShoot = false;
         }
         else if (!keys.test(Key::SPACE)) {
@@ -108,38 +111,54 @@ void Player::update(double tDelta) {
             orientation -= glm::radians(180.0f) * (float)tDelta;
         }
         
-        
-        if (keys.test(Key::LSHIFT)&& boosted == false && shiftunpressed == false)
-        {
+      
+       
 
-            velocity += velocity * 1.1f * (float)tDelta;
-           
-            
-            if (boostCooldown > 0.0f) {
-                boostCooldown -= static_cast<float>(tDelta);
-                if (boostCooldown < 0.0f) boostCooldown = 0.0f;
-            }
-			player->textureID = loadTexture("Resources\\Textures\\spaceshipWithFire.png");
-        }
-        else if (!keys.test(Key::LSHIFT)&& boostCooldown<2.0f) {
-            
-            player->textureID = loadTexture("Resources\\Textures\\spaceship3.png");
-            shiftunpressed = true;
-            
-        }
-        if(shiftunpressed == true)
-        {
+        bool isBoosting = false;
+
         
-            if (boostCooldown < 2.0f) {
-                boosted = true;
-                boostCooldown += static_cast<float>(tDelta)/2;
-                if (boostCooldown > 2.0f) {
-                    boostCooldown = 2.0f;
-                    boosted = false;
-                    shiftunpressed = false;
-                }
+        if (boostLockout > 0.0f)
+        {
+            boostLockout -= (float)tDelta;
+            if (boostLockout < 0.0f) boostLockout = 0.0f;
+        }
+
+        bool canBoost = (boostCooldown > 0.0f) && (boostLockout == 0.0f);
+
+        if (keys.test(Key::LSHIFT) && canBoost)
+        {
+            isBoosting = true;
+
+            glm::vec3 forward = glm::vec3(cos(orientation), sin(orientation), 0.0f);
+            float boostPower = 6.0f;
+
+            velocity += forward * boostPower * (float)tDelta;
+
+            // drain boost meter
+            boostCooldown -= (float)tDelta * 1.0f;
+            if (boostCooldown <= 0.0f)
+            {
+                boostCooldown = 0.0f;
+                boostLockout = 0.5f;     
             }
         }
+        if (isBoosting)
+        {
+            player->textureID = loadTexture("Resources/Textures/spaceshipWithFire.png");
+        }
+        else
+        {
+            player->textureID = loadTexture("Resources/Textures/spaceship3.png");
+
+            
+            if (boostLockout == 0.0f)
+            {
+                boostCooldown += (float)tDelta * 0.3f;
+                if (boostCooldown > 2.0f)
+                    boostCooldown = 2.0f;
+            }
+        }
+
     
             
 		

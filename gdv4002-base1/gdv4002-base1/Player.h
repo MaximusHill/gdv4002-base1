@@ -19,6 +19,4 @@ public:
 	float collisionCooldown = 0.0f;
 	float boostCooldown = 2.0f;
 	
-	bool boosted = false;
-
 };
