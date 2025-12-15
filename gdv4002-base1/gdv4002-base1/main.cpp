@@ -50,8 +50,6 @@ int main(void) {
     
     hideAxisLines();
     
-    float playerVelocity = 2.0f;
-    
     int initResult = engineInit("GDV4002 - Applied Maths for Games", 1024, 1024);
 
     setViewplaneWidth(10.0f);
@@ -71,13 +69,8 @@ int main(void) {
     glfwSetMouseButtonCallback(glfwGetCurrentContext(), myMouseButtonHandler);
 
     // create menu buttons
-    float vw = getViewplaneWidth();
-    float vh = getViewplaneHeight();
-
-    GLuint Playbtn = loadTexture("Resources\\Textures\\Play_Button2.png");
-    GLuint Exitbtn = loadTexture("Resources\\Textures\\Exit_Button2.png");
-    playButton = new Button(glm::vec3(0.0f, 0.0f, 0.0f), 0.0f, glm::vec2(3.5f, 1.0f), Playbtn, ButtonAction::PLAY);
-    exitButton = new Button(glm::vec3(0.0f, -1.5f, 0.0f), 0.0f, glm::vec2(3.5f, 1.0f), Exitbtn, ButtonAction::EXIT);
+    playButton = new Button(glm::vec3(0.0f, 0.0f, 0.0f), 0.0f, glm::vec2(3.5f, 1.0f), loadTexture("Resources\\Textures\\Play_Button2.png"), ButtonAction::PLAY);
+    exitButton = new Button(glm::vec3(0.0f, -1.5f, 0.0f), 0.0f, glm::vec2(3.5f, 1.0f), loadTexture("Resources\\Textures\\Exit_Button2.png"), ButtonAction::EXIT);
     addObject("menuPlay", playButton);
     addObject("menuExit", exitButton);
 
@@ -131,9 +124,9 @@ void initBackgroundObjects() {
 void initGameplayObjects() {
 
    
-    GLuint playerTexture = loadTexture("Resources\\Textures\\spaceship3.png");
+  
     
-    Player* mainPlayer = new Player(glm::vec3(0.0f, 0.0f,0.5f), 0.0f, glm::vec2(0.5f, 0.5f), playerTexture, 0.5f);
+    Player* mainPlayer = new Player(glm::vec3(0.0f, 0.0f,0.5f), 0.0f, glm::vec2(0.5f, 0.5f), loadTexture("Resources\\Textures\\spaceship3.png"), 0.5f);
     player = mainPlayer;
     addObject("player", mainPlayer);
   

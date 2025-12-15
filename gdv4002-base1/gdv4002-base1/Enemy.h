@@ -15,12 +15,6 @@ public:
     float rotationSpeed;
 	float knockbackDecay = 1.0f;
     bool alive = true;
-    static float randomPositionX2();
-    static float randomPositionY2();
-    static float randomRotation2();
-    static float randomSizeX2();
-    static float randomSizeY2();
-    static GLuint randomEnemyTexture2();
     void respawn();
     static std::vector<Enemy*> enemies;
 };
