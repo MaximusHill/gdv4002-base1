@@ -20,16 +20,16 @@ void Lives::update(double tDelta)
 
         
 
-        GameObject2D* d1 = getObject("DyingLeft1");
-        GameObject2D* d2 = getObject("DyingLeft2");
-        GameObject2D* d3 = getObject("DyingLeft3");
+        GameObject2D* l1 = getObject("DyingLeft1");
+        GameObject2D* l2 = getObject("DyingLeft2");
+        GameObject2D* l3 = getObject("DyingLeft3");
 
         GameObject2D* r1 = getObject("DyingRight1");
         GameObject2D* r2 = getObject("DyingRight2");
         GameObject2D* r3 = getObject("DyingRight3");
 
-        Dying* candidates[6] = { (Dying*)d1, (Dying*)d2, (Dying*)d3, (Dying*)r1, (Dying*)r2, (Dying*)r3 };
-        //dc == dying candidate
+        Dying* candidates[6] = { (Dying*)l1, (Dying*)l2, (Dying*)l3, (Dying*)r1, (Dying*)r2, (Dying*)r3 };
+        //dc = dying candidate
         for (int i = 0; i < 6; ++i) {
             Dying* dc = candidates[i];
             if (!dc) continue;
@@ -60,7 +60,7 @@ void Lives::loseLife() {
             victim = L;
         }
         else {
-            // reverse ordering: prefer smaller y, then smaller x
+            // reverse ordering prefer smaller y, then smaller x
             if (L->position.y < victim->position.y ||
                 (L->position.y == victim->position.y && L->position.x < victim->position.x)) {
                 victim = L;

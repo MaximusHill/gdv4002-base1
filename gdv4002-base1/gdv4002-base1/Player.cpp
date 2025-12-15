@@ -42,24 +42,12 @@ void Player::update(double tDelta) {
     const float thrust = 3.0f;
     glm::vec3 offset = glm::vec3(cos(player->orientation), sin(player->orientation), 0.0f) * 0.2f;
  
-    //bottom
-    if (position.y < -getViewplaneHeight() / 2.0f) {
-
-        position.y += getViewplaneHeight();
-    }
-    //left
-    if (position.x < -getViewplaneWidth() / 2.0f) {
-
-        position.x += getViewplaneWidth();
-    }
-    //top
-    if (position.y > getViewplaneHeight() / 2.0f) {
-        position.y -= getViewplaneHeight();
-    }
-    //right
-    if (position.x > getViewplaneWidth() / 2.0f) {
-        position.x -= getViewplaneWidth();
-    }
+    float halfWidth = getViewplaneWidth() / 2.0f;
+    float halfHeight = getViewplaneHeight() / 2.0f;
+    if (position.y < -halfHeight) position.y += getViewplaneHeight();
+    if (position.y > halfHeight) position.y -= getViewplaneHeight();
+    if (position.x < -halfWidth) position.x += getViewplaneWidth();
+    if (position.x > halfWidth) position.x -= getViewplaneWidth();
 
     #pragma region keyboardhandling
 
@@ -185,7 +173,7 @@ void Player::update(double tDelta) {
             if (!Lives::lives.empty()) {
                 Lives::lives[0]->loseLife();
             }
-
+			Bullets::points -= 100;
             
             collisionCooldown = 0.1f;
         }

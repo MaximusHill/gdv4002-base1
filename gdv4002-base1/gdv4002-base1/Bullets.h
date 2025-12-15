@@ -4,7 +4,7 @@
 
 class Bullets : public GameObject2D {
 private:
-    float mass;
+    float mass = 0;
     glm::vec3 velocity;
     bool hitRegistered = false;
 

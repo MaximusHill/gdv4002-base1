@@ -20,15 +20,17 @@ void Background::update(double tDelta) {
 	float width = getViewplaneWidth();
 	float height = getViewplaneHeight();
 
+	// Wrap around
+
 	if (position.x < -width) position.x += 2 * width;
 	if (position.x > width)  position.x -= 2 * width;
 	if (position.y < -height) position.y += 2 * height;
 	if (position.y > height)  position.y -= 2 * height;
 
 	if (player != nullptr) {
-		float parallaxFactorX = 0.2f; 
-		float parallaxFactorY = 0.2f;
-		position.y += player->getVelocity().y * (float)tDelta * parallaxFactorY;
-		position.x += player->getVelocity().x * (float)tDelta * parallaxFactorX;
+		//add parallax effect based on player velocity
+		float parallaxFactor = 0.2f;
+		position.y += player->getVelocity().y * (float)tDelta * parallaxFactor;
+		position.x += player->getVelocity().x * (float)tDelta * parallaxFactor;
 	}
 }

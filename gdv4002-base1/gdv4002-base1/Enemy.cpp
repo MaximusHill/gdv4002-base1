@@ -26,17 +26,20 @@ Enemy::Enemy(glm::vec3 initPosition, float initOrientation, glm::vec2 initSize, 
 
 
 void Enemy::update(double tDelta) {
-    if (!alive) return; // skip update if dead
+    if (!alive) return;
 
     // Apply gravity
     velocity += gravity * float(tDelta);
     velocity -= velocity * knockbackDecay * float(tDelta);
+
     // Collision with player
     if (player && CheckAABBCollision(player, this)) {
-        glm::vec2 dir = glm::normalize(glm::vec2(position.x, position.y) -
-            glm::vec2(player->position.x, player->position.y));
+		//dir = Direction 
+        glm::vec2 dir = glm::normalize(glm::vec2(position.x, position.y) - glm::vec2(player->position.x, player->position.y));
+
         float knockbackForce = 2.0f;
         velocity += glm::vec3(dir.x, dir.y, 0.0f) * knockbackForce;
+
         player->velocity += glm::vec3(-dir.x, -dir.y, 0.0f) * 0.5f;
         rotationSpeed += 1.5f;
     }
@@ -58,6 +61,7 @@ void Enemy::update(double tDelta) {
 }
 
 void Enemy::respawn() {
+	//reset enemy 
     alive = true;
     position = glm::vec3(randomPositionX(), randomPositionY(), 0.5f);
     orientation = randomRotation();

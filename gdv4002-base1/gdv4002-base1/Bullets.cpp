@@ -16,8 +16,11 @@ Bullets::Bullets(glm::vec3 initPosition, float initOrientation, glm::vec2 initSi
 
   
     
-    this->orientation = initOrientation+ glm::radians(270.0f);
-    // Set velocity ONCE (direction bullet is fired)
+   
+    // Set velocity and orientation 
+
+    this->orientation = initOrientation + glm::radians(270.0f);
+
     velocity = glm::vec3(cos(initOrientation),sin(initOrientation),0.0f) * 7.0f;
    
    
@@ -28,7 +31,7 @@ void Bullets::update(double tDelta) {
     position += velocity * (float)tDelta;
 
    
-   
+	// Check collision with enemies
     if (!hitRegistered) { 
         for (Enemy* e : enemies) {
             if (!e) continue;

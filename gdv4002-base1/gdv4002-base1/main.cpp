@@ -41,7 +41,7 @@ GameState currentGameState = GameState::MAIN_MENU;
 void initGameplayObjects();
 void initBackgroundObjects();
 
-// menu buttons
+// Menu buttons
 static Button* playButton = nullptr;
 static Button* exitButton = nullptr;
 #pragma endregion
@@ -330,7 +330,7 @@ void myRender(GLFWwindow* window) {
     
    
 
-    // Draw UI overlay based on game state
+   
     if (currentGameState == GameState::MAIN_MENU) {
         // background objects already initialized once at startup
 		player->velocity = glm::vec3(2.0f, -1.0f, 0.0f);
@@ -352,7 +352,7 @@ void myRender(GLFWwindow* window) {
         currentGameState = GameState::PLAYING;
     }
     else if (currentGameState == GameState::PLAYING) {
-        // show lives or simple HUD
+       
        
         glBuildFont(48,0);
         renderObjects();
