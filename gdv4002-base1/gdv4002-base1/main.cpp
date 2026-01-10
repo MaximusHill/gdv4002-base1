@@ -1,11 +1,6 @@
 #include "Engine.h"
-#include "Keys.h"
-#include <bitset>
-#include <string.h>
-#include <conio.h>
 #include "Player.h"
 #include "Enemy.h"
-#include <random>
 #include "Background.h"
 #include "Lives.h"
 #include "glPrint.h"
@@ -320,8 +315,6 @@ void myRender(GLFWwindow* window) {
         glEnd();
     }
 
-    
-   
 
    
     if (currentGameState == GameState::MAIN_MENU) {
@@ -347,7 +340,7 @@ void myRender(GLFWwindow* window) {
     else if (currentGameState == GameState::PLAYING) {
        
        
-        glBuildFont(48,0);
+        glBuildFont(48,0);    
         renderObjects();
         
         glColor3f(1.0f, 0.0f, 0.0f);

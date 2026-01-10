@@ -3,15 +3,12 @@
 #include "Player.h"
 #include "GameObject2D.h"
 #include "Engine.h"
-#include "Background.h"
 #include "Enemy.h"
 #include <vector>
 #include "Lives.h"
 #include "GameState.h"
 #include "Bullets.h"
 #include "Collision.h"
-#include "stdio.h"
-#include "glPrint.h"
 
 #pragma region externals and variables
 
@@ -167,7 +164,7 @@ void Player::update(double tDelta) {
         if (CheckAABBCollision(this, e) && collisionCooldown <= 0.0f) {
             glm::vec2 dir = glm::normalize(glm::vec2(position.x, position.y) - glm::vec2(e->position.x, e->position.y));
 
-            float knockbackForce = 0.5f;
+            float knockbackForce = 2.0f;
             velocity += glm::vec3(dir.x, dir.y, 0.0f) * knockbackForce;
 
             if (!Lives::lives.empty()) {

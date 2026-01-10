@@ -1,6 +1,5 @@
 #include "Enemy.h"
 #include <random>
-#include <ctime>
 #include "Engine.h"
 #include "Collision.h"
 #include "RandomEngine.h"
